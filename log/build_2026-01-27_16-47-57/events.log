@@ -1,0 +1,64 @@
+[0.000000] (-) TimerEvent: {}
+[0.000064] (test_pkg) JobQueued: {'identifier': 'test_pkg', 'dependencies': OrderedDict()}
+[0.000358] (test_pkg) JobStarted: {'identifier': 'test_pkg'}
+[0.003356] (test_pkg) JobProgress: {'identifier': 'test_pkg', 'progress': 'cmake'}
+[0.003650] (test_pkg) JobProgress: {'identifier': 'test_pkg', 'progress': 'build'}
+[0.004005] (test_pkg) Command: {'cmd': ['/usr/bin/cmake', '--build', '/home/mrl-pc3/CMNS_ws/build/test_pkg', '--', '-j12', '-l12'], 'cwd': '/home/mrl-pc3/CMNS_ws/build/test_pkg', 'env': OrderedDict({'GJS_DEBUG_TOPICS': 'JS ERROR;JS LOG', 'LESSOPEN': '| /usr/bin/lesspipe %s', 'VSCODE_CWD': '/home/mrl-pc3', 'VSCODE_ESM_ENTRYPOINT': 'vs/workbench/api/node/extensionHostProcess', 'USER': 'mrl-pc3', 'CODEX_INTERNAL_ORIGINATOR_OVERRIDE': 'codex_vscode', 'VSCODE_NLS_CONFIG': '{"userLocale":"en-us","osLocale":"en-us","resolvedLanguage":"en","defaultMessagesFile":"/usr/share/code/resources/app/out/nls.messages.json","locale":"en-us","availableLanguages":{}}', 'VSCODE_HANDLES_UNCAUGHT_ERRORS': 'true', 'XDG_SESSION_TYPE': 'x11', 'CLUTTER_DISABLE_MIPMAPPED_TEXT': '1', 'SHLVL': '0', 'HOME': '/home/mrl-pc3', 'CHROME_DESKTOP': 'code.desktop', 'DESKTOP_SESSION': 'ubuntu', 'VSCODE_IPC_HOOK': '/run/user/1000/vscode-4fdebc55-1.10-main.sock', 'GIO_LAUNCHED_DESKTOP_FILE': '/usr/share/applications/code.desktop', 'GNOME_SHELL_SESSION_MODE': 'ubuntu', 'GTK_MODULES': 'gail:atk-bridge', 'MANAGERPID': '1923', 'SYSTEMD_EXEC_PID': '2325', 'GSM_SKIP_SSH_AGENT_WORKAROUND': 'true', 'DBUS_SESSION_BUS_ADDRESS': 'unix:path=/run/user/1000/bus', 'GIO_LAUNCHED_DESKTOP_FILE_PID': '6447', 'VSCODE_CRASH_REPORTER_PROCESS_TYPE': 'extensionHost', 'DEBUGINFOD_URLS': 'https://debuginfod.ubuntu.com', 'LOGNAME': 'mrl-pc3', 'JOURNAL_STREAM': '9:12261', '_': '/usr/bin/colcon', 'MEMORY_PRESSURE_WATCH': '/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/session.slice/org.gnome.Shell@x11.service/memory.pressure', 'XDG_SESSION_CLASS': 'user', 'RUST_LOG': 'warn', 'USERNAME': 'mrl-pc3', 'GNOME_DESKTOP_SESSION_ID': 'this-is-deprecated', 'FC_FONTATIONS': '1', 'WINDOWPATH': '2', 'PATH': '/home/mrl-pc3/.codex/tmp/path/codex-arg0tNeXbk:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/snap/bin:/home/mrl-pc3/.vscode/extensions/openai.chatgpt-0.4.67-linux-x64/bin/linux-x86_64', 'SESSION_MANAGER': 'local/mrl-pc3-H610MH:@/tmp/.ICE-unix/2283,unix/mrl-pc3-H610MH:/tmp/.ICE-unix/2283', 'INVOCATION_ID': 'e47daa70c3bc4348b69bcfd5388ea488', 'XDG_MENU_PREFIX': 'gnome-', 'XDG_RUNTIME_DIR': '/run/user/1000', 'GDK_BACKEND': 'x11', 'DISPLAY': ':1', 'CODEX_SANDBOX_NETWORK_DISABLED': '1', 'LANG': 'en_US.UTF-8', 'XDG_CURRENT_DESKTOP': 'ubuntu:GNOME', 'XMODIFIERS': '@im=ibus', 'XDG_SESSION_DESKTOP': 'ubuntu', 'XAUTHORITY': '/run/user/1000/gdm/Xauthority', 'SSH_AUTH_SOCK': '/run/user/1000/keyring/ssh', 'SHELL': '/bin/bash', 'QT_ACCESSIBILITY': '1', 'ELECTRON_RUN_AS_NODE': '1', 'GDMSESSION': 'ubuntu', 'LESSCLOSE': '/usr/bin/lesspipe %s %s', 'GPG_AGENT_INFO': '/run/user/1000/gnupg/S.gpg-agent:0:1', 'GJS_DEBUG_OUTPUT': 'stderr', 'QT_IM_MODULE': 'ibus', 'PWD': '/home/mrl-pc3/CMNS_ws/build/test_pkg', 'LC_ALL': 'en_US.UTF-8', 'XDG_CONFIG_DIRS': '/etc/xdg/xdg-ubuntu:/etc/xdg', 'VSCODE_CODE_CACHE_PATH': '/home/mrl-pc3/.config/Code/CachedData/c9d77990917f3102ada88be140d28b038d1dd7c7', 'XDG_DATA_DIRS': '/usr/share/ubuntu:/usr/share/gnome:/usr/local/share/:/usr/share/:/var/lib/snapd/desktop', 'COLCON': '1', 'MEMORY_PRESSURE_WRITE': 'c29tZSAyMDAwMDAgMjAwMDAwMAA=', 'VSCODE_PID': '6447'}), 'shell': False}
+[0.018522] (test_pkg) StdoutLine: {'line': b'-- Found ament_cmake: 2.7.3 (/opt/ros/kilted/share/ament_cmake/cmake)\n'}
+[0.099924] (-) TimerEvent: {}
+[0.200075] (-) TimerEvent: {}
+[0.300260] (-) TimerEvent: {}
+[0.400533] (-) TimerEvent: {}
+[0.500836] (-) TimerEvent: {}
+[0.601083] (-) TimerEvent: {}
+[0.701308] (-) TimerEvent: {}
+[0.801473] (-) TimerEvent: {}
+[0.901615] (-) TimerEvent: {}
+[1.001822] (-) TimerEvent: {}
+[1.102043] (-) TimerEvent: {}
+[1.202208] (-) TimerEvent: {}
+[1.302369] (-) TimerEvent: {}
+[1.402524] (-) TimerEvent: {}
+[1.502666] (-) TimerEvent: {}
+[1.602796] (-) TimerEvent: {}
+[1.702946] (-) TimerEvent: {}
+[1.803111] (-) TimerEvent: {}
+[1.903263] (-) TimerEvent: {}
+[2.003423] (-) TimerEvent: {}
+[2.103586] (-) TimerEvent: {}
+[2.147525] (test_pkg) StderrLine: {'line': b'Traceback (most recent call last):\n'}
+[2.147665] (test_pkg) StderrLine: {'line': b'  File "/opt/ros/kilted/share/ament_cmake_core/cmake/package_templates/templates_2_cmake.py", line 21, in <module>\n'}
+[2.147715] (test_pkg) StderrLine: {'line': b'    from ament_package.templates import get_environment_hook_template_path\n'}
+[2.147755] (test_pkg) StderrLine: {'line': b"ModuleNotFoundError: No module named 'ament_package'\n"}
+[2.147793] (test_pkg) StderrLine: {'line': b'Error in sys.excepthook:\n'}
+[2.147830] (test_pkg) StderrLine: {'line': b'Traceback (most recent call last):\n'}
+[2.147867] (test_pkg) StderrLine: {'line': b'  File "/usr/lib/python3/dist-packages/apport_python_hook.py", line 228, in partial_apport_excepthook\n'}
+[2.147949] (test_pkg) StderrLine: {'line': b'    return apport_excepthook(binary, exc_type, exc_obj, exc_tb)\n'}
+[2.147988] (test_pkg) StderrLine: {'line': b'           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n'}
+[2.148023] (test_pkg) StderrLine: {'line': b'  File "/usr/lib/python3/dist-packages/apport_python_hook.py", line 144, in apport_excepthook\n'}
+[2.148057] (test_pkg) StderrLine: {'line': b'    os.open(pr_filename, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o640), "wb"\n'}
+[2.148090] (test_pkg) StderrLine: {'line': b'    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n'}
+[2.148123] (test_pkg) StderrLine: {'line': b"PermissionError: [Errno 13] Permission denied: '/var/crash/_opt_ros_kilted_share_ament_cmake_core_cmake_package_templates_templates_2_cmake.py.1000.crash'\n"}
+[2.148155] (test_pkg) StderrLine: {'line': b'\n'}
+[2.148187] (test_pkg) StderrLine: {'line': b'Original exception was:\n'}
+[2.148220] (test_pkg) StderrLine: {'line': b'Traceback (most recent call last):\n'}
+[2.148252] (test_pkg) StderrLine: {'line': b'  File "/opt/ros/kilted/share/ament_cmake_core/cmake/package_templates/templates_2_cmake.py", line 21, in <module>\n'}
+[2.148285] (test_pkg) StderrLine: {'line': b'    from ament_package.templates import get_environment_hook_template_path\n'}
+[2.148319] (test_pkg) StderrLine: {'line': b"ModuleNotFoundError: No module named 'ament_package'\n"}
+[2.168197] (test_pkg) StderrLine: {'line': b'CMake Error at /opt/ros/kilted/share/ament_cmake_core/cmake/ament_cmake_package_templates-extras.cmake:41 (message):\n'}
+[2.168352] (test_pkg) StderrLine: {'line': b'  execute_process(/usr/bin/python3\n'}
+[2.168399] (test_pkg) StderrLine: {'line': b'  /opt/ros/kilted/share/ament_cmake_core/cmake/package_templates/templates_2_cmake.py\n'}
+[2.168438] (test_pkg) StderrLine: {'line': b'  /home/mrl-pc3/CMNS_ws/build/test_pkg/ament_cmake_package_templates/templates.cmake)\n'}
+[2.168474] (test_pkg) StderrLine: {'line': b'  returned error code 1\n'}
+[2.168510] (test_pkg) StderrLine: {'line': b'Call Stack (most recent call first):\n'}
+[2.168546] (test_pkg) StderrLine: {'line': b'  /opt/ros/kilted/share/ament_cmake_core/cmake/ament_cmake_coreConfig.cmake:41 (include)\n'}
+[2.168589] (test_pkg) StderrLine: {'line': b'  /opt/ros/kilted/share/ament_cmake/cmake/ament_cmake_export_dependencies-extras.cmake:15 (find_package)\n'}
+[2.168624] (test_pkg) StderrLine: {'line': b'  /opt/ros/kilted/share/ament_cmake/cmake/ament_cmakeConfig.cmake:41 (include)\n'}
+[2.168658] (test_pkg) StderrLine: {'line': b'  CMakeLists.txt:9 (find_package)\n'}
+[2.168692] (test_pkg) StderrLine: {'line': b'\n'}
+[2.168726] (test_pkg) StderrLine: {'line': b'\n'}
+[2.168759] (test_pkg) StdoutLine: {'line': b'-- Configuring incomplete, errors occurred!\n'}
+[2.170193] (test_pkg) StderrLine: {'line': b'gmake: *** [Makefile:226: cmake_check_build_system] Error 1\n'}
+[2.171361] (test_pkg) CommandEnded: {'returncode': 2}
+[2.177868] (test_pkg) JobEnded: {'identifier': 'test_pkg', 'rc': 2}
+[2.188255] (-) EventReactorShutdown: {}

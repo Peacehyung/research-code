@@ -1,0 +1,2 @@
+Invoking command in '/home/mrl-pc3/CMNS_ws/build/test_pkg': DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake --build /home/mrl-pc3/CMNS_ws/build/test_pkg -- -j12 -l12
+Invoked command in '/home/mrl-pc3/CMNS_ws/build/test_pkg' returned '2': DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake --build /home/mrl-pc3/CMNS_ws/build/test_pkg -- -j12 -l12
