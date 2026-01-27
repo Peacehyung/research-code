@@ -2,8 +2,9 @@
 
 ## Header ##########################################################
 import matplotlib.pyplot as plt
+import numpy as np
 from structure import *
-from computation import *
+from evaluation import Evaluation
 
 ## Main function ###################################################
 theta = 0.0                                   # initial orientation
@@ -32,24 +33,15 @@ def outputPlot():
             desired_force=np.array([[0.0], [0.0], [0.0]]),
             )
         
-        Com = Computation(
-            structure=Structure1,
-            position=np.array([[60.0], [60.0], [64.0]]),
-            orientation=theta,
-            desired_torque=np.array([[0.0], [0.0], [0.007]]),
-            desired_force=np.array([[0.0], [0.0], [0.0]]),
-            current_vector=Eval.Iopt
-            )
-        
         theta_list.append(theta/np.pi*180)
         I1_list.append(Eval.Iopt.flatten()[0])
         I2_list.append(Eval.Iopt.flatten()[1])
-        Ttotx_list.append(Com.Ttot.flatten()[0])
-        Ttoty_list.append(Com.Ttot.flatten()[1])
-        Ttotz_list.append(Com.Ttot.flatten()[2])
-        Ftotx_list.append(Com.Ftot.flatten()[0])
-        Ftoty_list.append(Com.Ftot.flatten()[1])
-        Ftotz_list.append(Com.Ftot.flatten()[2])
+        Ttotx_list.append(Eval.Ttot.flatten()[0])
+        Ttoty_list.append(Eval.Ttot.flatten()[1])
+        Ttotz_list.append(Eval.Ttot.flatten()[2])
+        Ftotx_list.append(Eval.Ftot.flatten()[0])
+        Ftoty_list.append(Eval.Ftot.flatten()[1])
+        Ftotz_list.append(Eval.Ftot.flatten()[2])
 
         theta += np.pi/180
 

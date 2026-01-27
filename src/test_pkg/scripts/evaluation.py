@@ -54,6 +54,7 @@ class Evaluation:
         # desired_Bz,
         desired_torque,                             # desired torque
         desired_force,                               # desired force
+        current_vector=None,
         ):
 
         self.structure = structure
@@ -118,3 +119,33 @@ class Evaluation:
             parameters=np.logspace(-10, 4, 1000),
             norm_maximum=13,
             )
+
+        self.compute_response(current_vector)
+
+    def compute_response(self, current_vector=None):
+        if current_vector is None:
+            current_vector = self.Iopt
+        self.current_vector = current_vector
+
+        self.B = {}
+        self.Tm = {}
+        self.F = {}
+
+        for key in self.structure.rL.keys():
+            self.B[key] = mapFieldGain(self.rW[key]).dot(self.current_vector)
+
+        for key in self.structure.rL.keys():
+            self.Tm[key] = self.sk_M[key].dot(self.B[key])
+            self.F[key] = np.vstack((
+                (self.mW[key].T).dot(mapGradXGain(self.rW[key]).dot(self.current_vector)),
+                (self.mW[key].T).dot(mapGradYGain(self.rW[key]).dot(self.current_vector)),
+                (self.mW[key].T).dot(mapGradZGain(self.rW[key]).dot(self.current_vector)),
+            ))
+
+        self.Ftot = sum(self.F.values())
+        self.TmTot = sum(self.Tm.values())
+        self.TfTot = sum(self.sk_R[name].dot(self.F[name]) for name in self.F)
+        self.Ttot = (self.rotZ.T).dot(self.TmTot + self.TfTot)
+
+    def comField(self, position):
+        return mapFieldGain(position).dot(self.current_vector)

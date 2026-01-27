@@ -4,7 +4,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from structure import *
-from computation import *
+from evaluation import Evaluation
 
 ## Main function ###################################################
 def main():
@@ -40,7 +40,7 @@ def main():
                 desired_force=np.array([[0.0], [0.0], [0.0]])
             )
 
-            Com = Computation(
+            Com = Evaluation(
                 structure=Structure2,
                 position=np.array([[60.0], [60.0], [55.0]]),
                 orientation=theta_rad,

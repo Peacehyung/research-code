@@ -5,8 +5,9 @@ import rclpy
 import time
 import signal
 import PSU_serial as PSU
+import numpy as np
 from structure import *
-from computation import *
+from evaluation import Evaluation
 from visualization import *
 
 ## ROS signal shutdown #############################################
@@ -53,15 +54,6 @@ def experiment():
             desired_force=np.array([[0.0], [0.0], [0.0]]),
             )
         
-        Com = Computation(
-            structure=Structure1,
-            position=np.array([[60.0], [60.0], [64.0]]),
-            orientation=theta,
-            desired_torque=np.array([[0.0], [0.0], [0.007]]),
-            desired_force=np.array([[0.0], [0.0], [0.0]]),
-            current_vector=Eval.Iopt
-            )
-
         V = Eval.Iopt.flatten() * Res
 
         print(Eval.Iopt)
@@ -71,7 +63,7 @@ def experiment():
                                   shaft_thick=0.05,
                                   head_size=0.2,
                                   color=yellow,
-                                  vector_function=Com.comField)
+                                  vector_function=Eval.comField)
 
         r1.publish_point(radius=0.5,
                          color=red, 
