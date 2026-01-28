@@ -16,10 +16,11 @@ def plot_response(show=True):
     Ftotx_list, Ftoty_list, Ftotz_list = [], [], []
 
     while theta <= 2 * np.pi:
-        Structure1 = RobotDesign1(
-            distance=2.5,
+        Structure1 = RobotDesign(
+            magnet_distance=2.5,
             moment_value=0.001875,
             number_magnets=3,
+            pattern="e5",
         )
 
         Eval = ActuationModel(
@@ -90,10 +91,11 @@ def plot_torque_map(show=True):
         for j, delta_deg in enumerate(delta_range):
             delta_rad = np.deg2rad(delta_deg)
 
-            Structure2 = RobotDesign1(  # Giltinan et al.
-                distance=0.1,
+            Structure2 = RobotDesign(  # Giltinan et al.
+                magnet_distance=0.1,
                 moment_value=4.4e-12,
                 number_magnets=5,
+                pattern="e5",
             )
 
             input_eval = ActuationModel(

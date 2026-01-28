@@ -1,77 +1,76 @@
 #!/usr/bin/env python3
 
-## Header ##########################################################
+## Header #####################################################################################
 import numpy as np
 
-## Structure 1 #####################################################
-class RobotDesign1:                         # Diller et al. maximizing e5
+## Robot design for 6-DOF (Diller et al.) #####################################################
+class RobotDesign:
 
     def __init__(
             self,
-            distance,                # magnet-to-magnet distance, mm
-            moment_value,      # magnitude of magnetic moment, A*m^2
-            number_magnets,                      # number of magnets
+            magnet_distance: float,                      # magnet-to-magnet distance (unit: mm)
+            moment_value: float,                   # magnitude of magnetic moment (unit: A*m^2)
+            number_magnets: int,                                            # number of magnets
+            pattern: str = "e5",                         # magnetization pattern, default: "e5"
             ):                 
         
-        self.distance = distance
+        self.magnet_distance = magnet_distance
         self.moment_value = moment_value
         self.number_magnets = number_magnets
+        self.pattern = pattern
 
-        d = self.distance
+        d = self.magnet_distance
         m = self.moment_value
 
-        self.rL = {}   # position vectors in local coordinate system
-        self.mL = {}      # magnetization in local coordinate system
+        self.RL = {}                              # position vectors in local coordinate system
+        self.ML = {}                                 # magnetization in local coordinate system
 
-        self.rL['O'] = np.zeros((3, 1))
-        self.mL['O'] = np.array([[0.0], [0.0], [+m]])
+        self.RL['O'] = np.zeros((3, 1))
+        self.ML['O'] = np.array([[0.0], [0.0], [+m]])
             
         if self.number_magnets >= 3:
-            self.rL.update({
-                '1': np.array([[+d], [0.0], [0.0]]),
+            self.RL.update({
+                '1': np.array([[+d], [0.0], [0.0]]), 
                 '3': np.array([[-d], [0.0], [0.0]]),
-                })
-            self.mL.update({
-                '1': np.array([[+m], [0.0], [0.0]]),
-                '3': np.array([[-m], [0.0], [0.0]]),
                 })
         
         if self.number_magnets >= 5:
-            self.rL.update({
+            self.RL.update({
                 '2': np.array([[0.0], [+d], [0.0]]),
                 '4': np.array([[0.0], [-d], [0.0]]),
                 })
-            self.mL.update({
-                '2': np.array([[0.0], [-m], [0.0]]),
-                '4': np.array([[0.0], [+m], [0.0]]),
-                })
-        
-## Structure 2 #####################################################
-class RobotDesign2(RobotDesign1):                # Diller et al. maximizing e4
 
-    def __init__(
-            self, 
-            distance, 
-            moment_value, 
-            number_magnets,
-            ):
-        
-        super().__init__(
-            distance, 
-            moment_value, 
-            number_magnets,
-            )
+        self._apply_pattern()
 
+    def _apply_pattern(self):
         m = self.moment_value
 
-        if self.number_magnets >= 3:
-            self.mL.update({
-                '1': np.array([[0.0], [+m], [0.0]]),
-                '3': np.array([[0.0], [-m], [0.0]]),
-                })
+        if self.pattern == "e5":                          # magnetization pattern maximizing e5
+            if self.number_magnets >= 3:
+                self.ML.update({
+                    '1': np.array([[+m], [0.0], [0.0]]),
+                    '3': np.array([[-m], [0.0], [0.0]]),
+                    })
 
-        if self.number_magnets >= 5:
-            self.mL.update({
-                '2': np.array([[+m], [0.0], [0.0]]),
-                '4': np.array([[-m], [0.0], [0.0]]),
-                })
+            if self.number_magnets >= 5:
+                self.ML.update({
+                    '2': np.array([[0.0], [-m], [0.0]]),
+                    '4': np.array([[0.0], [+m], [0.0]]),
+                    })
+            return
+
+        if self.pattern == "e4":                          # magnetization pattern maximizing e4
+            if self.number_magnets >= 3:
+                self.ML.update({
+                    '1': np.array([[0.0], [+m], [0.0]]),
+                    '3': np.array([[0.0], [-m], [0.0]]),
+                    })
+
+            if self.number_magnets >= 5:
+                self.ML.update({
+                    '2': np.array([[+m], [0.0], [0.0]]),
+                    '4': np.array([[-m], [0.0], [0.0]]),
+                    })
+            return
+
+        raise ValueError(f"Unknown pattern: {self.pattern}")

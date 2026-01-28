@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
-## Header ##########################################################
+## Header #####################################################################################
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import BoundaryNorm
 from pathlib import Path
 
-## Polynomial modeling #############################################
+## System's modeling for magnetic actuation ###################################################
 class MagneticModel:
     _coeffs_cache = None
 
@@ -24,10 +24,10 @@ class MagneticModel:
 
     @staticmethod
     def generate_Poly(position: np.ndarray) -> np.ndarray:
-        x, y, z = position.flatten()  # position must be numpy (3, 1) array
+        x, y, z = position.flatten()                      # position must be numpy (3, 1) array
 
         return np.array([[
-            x**5, y**5, z**5,                                  # Quintic
+            x**5, y**5, z**5,                                                         # Quintic
             x**4 * y, x**4 * z, y**4 * x,
             y**4 * z, z**4 * x, z**4 * y,
             x**3 * y**2, x**3 * z**2, y**3 * x**2,
@@ -35,23 +35,23 @@ class MagneticModel:
             x**3 * y * z, y**3 * x * z, z**3 * x * y,
             x**2 * y**2 * z, x**2 * z**2 * y, y**2 * z**2 * x,
 
-            x**4, y**4, z**4,                                  # Quartic
+            x**4, y**4, z**4,                                                         # Quartic
             x**3 * y, x**3 * z, y**3 * x,
             y**3 * z, z**3 * x, z**3 * y,
             x**2 * y**2, x**2 * z**2, y**2 * z**2,
             x**2 * y * z, y**2 * x * z, z**2 * x * y,
 
-            x**3, y**3, z**3,                                    # Cubic
+            x**3, y**3, z**3,                                                           # Cubic
             x**2 * y, x**2 * z, y**2 * x,
             y**2 * z, z**2 * x, z**2 * y,
             x * y * z,
 
-            x**2, y**2, z**2,                                # Quadratic
+            x**2, y**2, z**2,                                                       # Quadratic
             x * y, x * z, y * z,
 
-            x, y, z,                                            # Linear
+            x, y, z,                                                                   # Linear
 
-            1,                                                # Constant
+            1,                                                                       # Constant
             ]])
 
     def map_FieldGain(self, position: np.ndarray) -> np.ndarray:
@@ -73,7 +73,7 @@ class MagneticModel:
             cols.append((FWD - BWD) / (2 * h))
         return np.hstack(cols)
 
-## Mapping the rank of the stacked field and gradient gain matrix ##
+## Mapping the rank of the stacked field and gradient gain matrix over XY plane ###############
 def map_Rank2D(model: MagneticModel, z: float, tol: float):
     x_rng = range(-70, 71)
     y_rng = range(-70, 71)
@@ -123,11 +123,11 @@ def map_Rank2D(model: MagneticModel, z: float, tol: float):
     plt.tight_layout()
     plt.show()
 
-## Execution #######################################################
+## Main function ##############################################################################
 def main():
     model = MagneticModel()
     map_Rank2D(model, z=40.0, tol=1e-3)
 
-
+## Execution ##################################################################################
 if __name__ == '__main__':
     main()

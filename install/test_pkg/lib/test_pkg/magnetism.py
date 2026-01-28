@@ -10,10 +10,7 @@ from pathlib import Path
 class MagneticModel:
     _coeffs_cache = None
 
-    def __init__(self, coeff_dir=None, coeffs=None):
-        if coeffs is not None:
-            self.coeffs = coeffs
-            return
+    def __init__(self, coeff_dir=None):
 
         if coeff_dir is None:
             coeff_dir = Path(__file__).resolve().parent
@@ -77,7 +74,7 @@ class MagneticModel:
         return np.hstack(cols)
 
 ## Mapping the rank of the stacked field and gradient gain matrix ##
-def map_Rank2D(model: MagneticModel):
+def map_Rank2D(model: MagneticModel, z: float, tol: float):
     x_rng = range(-70, 71)
     y_rng = range(-70, 71)
 
@@ -85,15 +82,15 @@ def map_Rank2D(model: MagneticModel):
 
     for xi, x in enumerate(x_rng):
         for yj, y in enumerate(y_rng):
-            POS = np.array([[x], [y], [40.0]])
+            POS = np.array([[x], [y], [z]])
 
             B_GAIN  = model.map_FieldGain(POS)
             GX_GAIN = model.map_GradGain(POS, axis=0)
             GY_GAIN = model.map_GradGain(POS, axis=1)
             GZ_GAIN = model.map_GradGain(POS, axis=2)
 
-            BG_MAT = np.vstack((B_GAIN, GZ_GAIN, GY_GAIN[0:2, :]))
-            RK_GRID[xi, yj] = np.linalg.matrix_rank(BG_MAT, tol=1e-3)
+            BG_GAIN = np.vstack((B_GAIN, GZ_GAIN, GY_GAIN[0:2, :]))
+            RK_GRID[xi, yj] = np.linalg.matrix_rank(BG_GAIN, tol=tol)
 
     # rmin = int(Rank_grid.min())
     # rmax = int(Rank_grid.max())
@@ -129,7 +126,7 @@ def map_Rank2D(model: MagneticModel):
 ## Execution #######################################################
 def main():
     model = MagneticModel()
-    map_Rank2D(model)
+    map_Rank2D(model, z=40.0, tol=1e-3)
 
 
 if __name__ == '__main__':
