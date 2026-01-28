@@ -7,7 +7,7 @@ import signal
 import numpy as np
 from structure import *
 from evaluation import Evaluation
-from test_pkg.scripts.marker import *
+from test_pkg.scripts.markers import *
 
 ## ROS signal shutdown #############################################
 ## Main function ###################################################
