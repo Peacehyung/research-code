@@ -19,12 +19,6 @@ def main():
         for j, delta_deg in enumerate(delta_range):
             delta_rad = np.deg2rad(delta_deg)
 
-            Structure1 = Config3(                   # for experiment
-                distance=2.5,
-                moment_value=0.001875,
-                number_magnets=4,
-            )
-
             Structure2 = Config1(                  # Giltinan et al.
                 distance=0.1,
                 moment_value=4.4e-12,
