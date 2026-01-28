@@ -6,8 +6,8 @@ import time
 import signal
 import numpy as np
 from structure import *
-from evaluation import Evaluation
-from test_pkg.scripts.markers import *
+from solver import ActuationModel
+from markers import *
 
 ## ROS signal shutdown #############################################
 ## Main function ###################################################
@@ -36,13 +36,13 @@ def experiment():
     while rclpy.ok():
     # while theta <= 2*np.pi:
 
-        Structure1 = Config1(
+        Structure1 = RobotDesign1(
             distance=2.5, 
             moment_value=0.001875,
             number_magnets=3,
             )
 
-        Eval = Evaluation(
+        Eval = ActuationModel(
             structure=Structure1,
             position=np.array([[60.0], [60.0], [64.0]]),
             orientation=theta,

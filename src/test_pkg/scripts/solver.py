@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 
 ## Header ##########################################################
-from magnetism import *
+import numpy as np
+from magnetism import MagneticModel
+
+_MODEL = MagneticModel()
 
 ## Skew-symmetric matrix ###########################################
 def genSkewMat(vector):
@@ -44,7 +47,7 @@ def comTikhonov(
     return sol_opt
 
 ## Solving actuation matrix ########################################
-class Evaluation:
+class ActuationModel:
 
     def __init__(
         self,
@@ -55,6 +58,9 @@ class Evaluation:
         desired_torque,                             # desired torque
         desired_force,                               # desired force
         current_vector=None,
+        use_tikhonov=True,
+        tikhonov_params=None,
+        norm_maximum=13,
         ):
 
         self.structure = structure
@@ -92,14 +98,14 @@ class Evaluation:
             self.sk_M[key] = genSkewMat(M_rotated)
 
         for key in structure.rL.keys():
-            self.Tm_gain[key] = self.sk_M[key].dot(mapFieldGain(self.rW[key]))
+            self.Tm_gain[key] = self.sk_M[key].dot(_MODEL.map_FieldGain(self.rW[key]))
             self.F_gain[key] = np.vstack((
-                (self.mW[key].T).dot(mapGradXGain(self.rW[key])),
-                (self.mW[key].T).dot(mapGradYGain(self.rW[key])),
-                (self.mW[key].T).dot(mapGradZGain(self.rW[key])),
+                (self.mW[key].T).dot(_MODEL.map_GradGain(self.rW[key], axis=0)),
+                (self.mW[key].T).dot(_MODEL.map_GradGain(self.rW[key], axis=1)),
+                (self.mW[key].T).dot(_MODEL.map_GradGain(self.rW[key], axis=2)),
             ))
 
-        # self.Bz_gain = mapFieldGain(pos)[2:3, :]
+        # self.Bz_gain = _MODEL.map_FieldGain(pos)[2:3, :]
 
         # self.Output = np.vstack((np.array([[desired_Bz]]), desired_torque, desired_force))
         self.Output = np.vstack((self.rotZ.dot(desired_torque), self.rotZ.dot(desired_force)))
@@ -109,16 +115,11 @@ class Evaluation:
         # self.Act_mat = np.vstack((self.Bz_gain, self.TmTot_gain + self.TfTot_gain, self.F_gain['O']))
         self.Act_mat = np.vstack((self.TmTot_gain + self.TfTot_gain, self.F_gain['O']))
 
-        # pseudo-inversed current vector
-        # self.Iopt = np.linalg.pinv(self.Act_mat).dot(self.Output)
-        
-        # Tikhonov regularized current vector
-        self.Iopt = comTikhonov(
-            coefficient_matrix=self.Act_mat,
-            desired_vector=self.Output,
-            parameters=np.logspace(-10, 4, 1000),
-            norm_maximum=13,
-            )
+        self.Iopt = self.solve_current(
+            use_tikhonov=use_tikhonov,
+            tikhonov_params=tikhonov_params,
+            norm_maximum=norm_maximum,
+        )
 
         self.compute_response(current_vector)
 
@@ -132,14 +133,14 @@ class Evaluation:
         self.F = {}
 
         for key in self.structure.rL.keys():
-            self.B[key] = mapFieldGain(self.rW[key]).dot(self.current_vector)
+            self.B[key] = _MODEL.map_FieldGain(self.rW[key]).dot(self.current_vector)
 
         for key in self.structure.rL.keys():
             self.Tm[key] = self.sk_M[key].dot(self.B[key])
             self.F[key] = np.vstack((
-                (self.mW[key].T).dot(mapGradXGain(self.rW[key]).dot(self.current_vector)),
-                (self.mW[key].T).dot(mapGradYGain(self.rW[key]).dot(self.current_vector)),
-                (self.mW[key].T).dot(mapGradZGain(self.rW[key]).dot(self.current_vector)),
+                (self.mW[key].T).dot(_MODEL.map_GradGain(self.rW[key], axis=0).dot(self.current_vector)),
+                (self.mW[key].T).dot(_MODEL.map_GradGain(self.rW[key], axis=1).dot(self.current_vector)),
+                (self.mW[key].T).dot(_MODEL.map_GradGain(self.rW[key], axis=2).dot(self.current_vector)),
             ))
 
         self.Ftot = sum(self.F.values())
@@ -148,4 +149,18 @@ class Evaluation:
         self.Ttot = (self.rotZ.T).dot(self.TmTot + self.TfTot)
 
     def comField(self, position):
-        return mapFieldGain(position).dot(self.current_vector)
+        return _MODEL.map_FieldGain(position).dot(self.current_vector)
+
+    def solve_current(self, use_tikhonov=True, tikhonov_params=None, norm_maximum=13):
+        if not use_tikhonov:
+            return np.linalg.pinv(self.Act_mat).dot(self.Output)
+
+        if tikhonov_params is None:
+            tikhonov_params = np.logspace(-10, 4, 1000)
+
+        return comTikhonov(
+            coefficient_matrix=self.Act_mat,
+            desired_vector=self.Output,
+            parameters=tikhonov_params,
+            norm_maximum=norm_maximum,
+        )

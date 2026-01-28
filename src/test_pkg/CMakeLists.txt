@@ -25,12 +25,12 @@ endif()
 
 install(
   PROGRAMS
-    scripts/experiment.py
-    scripts/evaluation.py
-    scripts/structure.py
+    scripts/actuation_analysis.py
     scripts/magnetism.py
-    scripts/output_plot.py
-    scripts/torque_map.py
+    scripts/markers.py
+    scripts/solver.py
+    scripts/state_stream.py
+    scripts/structure.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
