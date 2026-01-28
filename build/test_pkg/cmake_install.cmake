@@ -44,12 +44,12 @@ endif()
 
 if(CMAKE_INSTALL_COMPONENT STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMPONENT)
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/test_pkg" TYPE PROGRAM FILES
-    "/home/mrl-pc3/CMNS_ws/src/test_pkg/scripts/experiment.py"
-    "/home/mrl-pc3/CMNS_ws/src/test_pkg/scripts/evaluation.py"
-    "/home/mrl-pc3/CMNS_ws/src/test_pkg/scripts/structure.py"
+    "/home/mrl-pc3/CMNS_ws/src/test_pkg/scripts/actuation_analysis.py"
     "/home/mrl-pc3/CMNS_ws/src/test_pkg/scripts/magnetism.py"
-    "/home/mrl-pc3/CMNS_ws/src/test_pkg/scripts/output_plot.py"
-    "/home/mrl-pc3/CMNS_ws/src/test_pkg/scripts/torque_map.py"
+    "/home/mrl-pc3/CMNS_ws/src/test_pkg/scripts/markers.py"
+    "/home/mrl-pc3/CMNS_ws/src/test_pkg/scripts/solver.py"
+    "/home/mrl-pc3/CMNS_ws/src/test_pkg/scripts/state_stream.py"
+    "/home/mrl-pc3/CMNS_ws/src/test_pkg/scripts/structure.py"
     )
 endif()
 

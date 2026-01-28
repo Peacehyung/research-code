@@ -4,7 +4,7 @@
 import numpy as np
 
 ## Structure 1 #####################################################
-class Config1:                         # Diller et al. maximizing e5
+class RobotDesign1:                         # Diller et al. maximizing e5
 
     def __init__(
             self,
@@ -47,7 +47,7 @@ class Config1:                         # Diller et al. maximizing e5
                 })
         
 ## Structure 2 #####################################################
-class Config2(Config1):                # Diller et al. maximizing e4
+class RobotDesign2(RobotDesign1):                # Diller et al. maximizing e4
 
     def __init__(
             self, 
