@@ -32,14 +32,14 @@ def plot_response(show=True):
         )
 
         theta_list.append(theta / np.pi * 180)
-        I1_list.append(Eval.Iopt.flatten()[0])
-        I2_list.append(Eval.Iopt.flatten()[1])
-        Ttotx_list.append(Eval.Ttot.flatten()[0])
-        Ttoty_list.append(Eval.Ttot.flatten()[1])
-        Ttotz_list.append(Eval.Ttot.flatten()[2])
-        Ftotx_list.append(Eval.Ftot.flatten()[0])
-        Ftoty_list.append(Eval.Ftot.flatten()[1])
-        Ftotz_list.append(Eval.Ftot.flatten()[2])
+        I1_list.append(Eval.I_OPT.flatten()[0])
+        I2_list.append(Eval.I_OPT.flatten()[1])
+        Ttotx_list.append(Eval.T_TOT.flatten()[0])
+        Ttoty_list.append(Eval.T_TOT.flatten()[1])
+        Ttotz_list.append(Eval.T_TOT.flatten()[2])
+        Ftotx_list.append(Eval.F_TOT.flatten()[0])
+        Ftoty_list.append(Eval.F_TOT.flatten()[1])
+        Ftotz_list.append(Eval.F_TOT.flatten()[2])
 
         theta += np.pi / 180
 
@@ -114,10 +114,10 @@ def plot_torque_map(show=True):
                 # desired_Bz=10.0,
                 desired_torque=np.array([[0.0], [0.0], [0.007]]),
                 desired_force=np.array([[0.0], [0.0], [0.0]]),
-                current_vector=input_eval.Iopt,
+                current_vector=input_eval.I_OPT,
             )
 
-            Ttot_grid[i, j] = real.Ttot.flatten()[2]
+            Ttot_grid[i, j] = real.T_TOT.flatten()[2]
 
     theta_grid, delta_grid = np.meshgrid(delta_range, theta_range)
 

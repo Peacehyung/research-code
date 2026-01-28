@@ -22,20 +22,20 @@ class RobotDesign:
         d = self.magnet_distance
         m = self.moment_value
 
-        self.RL = {}                              # position vectors in local coordinate system
-        self.ML = {}                                 # magnetization in local coordinate system
+        self.rb = {}                              # position vectors in local coordinate system
+        self.mb = {}                                 # magnetization in local coordinate system
 
-        self.RL['O'] = np.zeros((3, 1))
-        self.ML['O'] = np.array([[0.0], [0.0], [+m]])
+        self.rb['O'] = np.zeros((3, 1))
+        self.mb['O'] = np.array([[0.0], [0.0], [+m]])
             
         if self.number_magnets >= 3:
-            self.RL.update({
+            self.rb.update({
                 '1': np.array([[+d], [0.0], [0.0]]), 
                 '3': np.array([[-d], [0.0], [0.0]]),
                 })
         
         if self.number_magnets >= 5:
-            self.RL.update({
+            self.rb.update({
                 '2': np.array([[0.0], [+d], [0.0]]),
                 '4': np.array([[0.0], [-d], [0.0]]),
                 })
@@ -47,13 +47,13 @@ class RobotDesign:
 
         if self.pattern == "e5":                          # magnetization pattern maximizing e5
             if self.number_magnets >= 3:
-                self.ML.update({
+                self.mb.update({
                     '1': np.array([[+m], [0.0], [0.0]]),
                     '3': np.array([[-m], [0.0], [0.0]]),
                     })
 
             if self.number_magnets >= 5:
-                self.ML.update({
+                self.mb.update({
                     '2': np.array([[0.0], [-m], [0.0]]),
                     '4': np.array([[0.0], [+m], [0.0]]),
                     })
@@ -61,13 +61,13 @@ class RobotDesign:
 
         if self.pattern == "e4":                          # magnetization pattern maximizing e4
             if self.number_magnets >= 3:
-                self.ML.update({
+                self.mb.update({
                     '1': np.array([[0.0], [+m], [0.0]]),
                     '3': np.array([[0.0], [-m], [0.0]]),
                     })
 
             if self.number_magnets >= 5:
-                self.ML.update({
+                self.mb.update({
                     '2': np.array([[+m], [0.0], [0.0]]),
                     '4': np.array([[-m], [0.0], [0.0]]),
                     })
