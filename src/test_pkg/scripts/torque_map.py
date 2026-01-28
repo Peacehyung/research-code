@@ -25,7 +25,7 @@ def main():
                 number_magnets=5,
             )
 
-            Eval = Evaluation(
+            input = Evaluation(
                 structure=Structure2,
                 position=np.array([[60.0], [60.0], [55.0]]),
                 orientation=delta_rad,
@@ -34,17 +34,17 @@ def main():
                 desired_force=np.array([[0.0], [0.0], [0.0]])
             )
 
-            Com = Evaluation(
+            real = Evaluation(
                 structure=Structure2,
                 position=np.array([[60.0], [60.0], [55.0]]),
                 orientation=theta_rad,
                 # desired_Bz=10.0,
                 desired_torque=np.array([[0.0], [0.0], [0.007]]),
                 desired_force=np.array([[0.0], [0.0], [0.0]]),
-                current_vector=Eval.Iopt
+                current_vector=input.Iopt
             )
 
-            Ttot_grid[i, j] = Com.Ttot.flatten()[2]
+            Ttot_grid[i, j] = real.Ttot.flatten()[2]
 
     Ttot_grid = np.array(Ttot_grid)
     theta_grid, delta_grid = np.meshgrid(delta_range, theta_range)
