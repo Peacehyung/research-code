@@ -4,6 +4,7 @@
 import rclpy
 import time
 import signal
+import PSU_serial as PSU
 import numpy as np
 from structure import *
 from evaluation import Evaluation
@@ -31,7 +32,10 @@ def experiment():
     r1 = MarkerPoint(node, 'r1')
     r3 = MarkerPoint(node, 'r3')
 
-    global theta
+    if not test_mode:
+        PSU.Turn_on()
+
+    global theta  
 
     while rclpy.ok():
     # while theta <= 2*np.pi:
@@ -69,10 +73,16 @@ def experiment():
                          color=blue,
                          position=Eval.rW['3'].flatten())
 
+        if not test_mode:
+            PSU.Transmit_DC(V)
+
         theta += np.pi/180
 
         rclpy.spin_once(node, timeout_sec=0.0)
         time.sleep(0.1)
+
+    if not test_mode:
+        PSU.Turn_off()
 
     node.destroy_node()
     rclpy.shutdown()

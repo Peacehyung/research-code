@@ -1,0 +1,6 @@
+[31mCMake Error at cmake_install.cmake:46 (file):
+  file INSTALL cannot find
+  "/home/mrl-pc3/CMNS_ws/src/test_pkg/scripts/experiment.": No such file or
+  directory.
+
+[0m

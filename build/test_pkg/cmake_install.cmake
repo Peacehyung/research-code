@@ -43,19 +43,26 @@ if(NOT DEFINED CMAKE_OBJDUMP)
 endif()
 
 if(CMAKE_INSTALL_COMPONENT STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/test_pkg" TYPE PROGRAM FILES "/home/mrl-pc3/CMNS_ws/src/test_pkg/scripts/magnetism.py")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/test_pkg" TYPE PROGRAM FILES
+    "/home/mrl-pc3/CMNS_ws/src/test_pkg/scripts/experiment.py"
+    "/home/mrl-pc3/CMNS_ws/src/test_pkg/scripts/evaluation.py"
+    "/home/mrl-pc3/CMNS_ws/src/test_pkg/scripts/structure.py"
+    "/home/mrl-pc3/CMNS_ws/src/test_pkg/scripts/magnetism.py"
+    "/home/mrl-pc3/CMNS_ws/src/test_pkg/scripts/output_plot.py"
+    "/home/mrl-pc3/CMNS_ws/src/test_pkg/scripts/torque_map.py"
+    )
 endif()
 
 if(CMAKE_INSTALL_COMPONENT STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMPONENT)
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/test_pkg" TYPE FILE FILES
-    "/home/mrl-pc3/CMNS_ws/src/test_pkg/scripts/C1.csv"
-    "/home/mrl-pc3/CMNS_ws/src/test_pkg/scripts/C2.csv"
-    "/home/mrl-pc3/CMNS_ws/src/test_pkg/scripts/C3.csv"
-    "/home/mrl-pc3/CMNS_ws/src/test_pkg/scripts/C4.csv"
-    "/home/mrl-pc3/CMNS_ws/src/test_pkg/scripts/C5.csv"
-    "/home/mrl-pc3/CMNS_ws/src/test_pkg/scripts/C6.csv"
-    "/home/mrl-pc3/CMNS_ws/src/test_pkg/scripts/C7.csv"
-    "/home/mrl-pc3/CMNS_ws/src/test_pkg/scripts/C8.csv"
+    "/home/mrl-pc3/CMNS_ws/src/test_pkg/data/C1.csv"
+    "/home/mrl-pc3/CMNS_ws/src/test_pkg/data/C2.csv"
+    "/home/mrl-pc3/CMNS_ws/src/test_pkg/data/C3.csv"
+    "/home/mrl-pc3/CMNS_ws/src/test_pkg/data/C4.csv"
+    "/home/mrl-pc3/CMNS_ws/src/test_pkg/data/C5.csv"
+    "/home/mrl-pc3/CMNS_ws/src/test_pkg/data/C6.csv"
+    "/home/mrl-pc3/CMNS_ws/src/test_pkg/data/C7.csv"
+    "/home/mrl-pc3/CMNS_ws/src/test_pkg/data/C8.csv"
     )
 endif()
 

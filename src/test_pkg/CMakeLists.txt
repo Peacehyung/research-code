@@ -25,20 +25,25 @@ endif()
 
 install(
   PROGRAMS
+    scripts/experiment.py
+    scripts/evaluation.py
+    scripts/structure.py
     scripts/magnetism.py
+    scripts/output_plot.py
+    scripts/torque_map.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
 install(
   FILES
-    scripts/C1.csv
-    scripts/C2.csv
-    scripts/C3.csv
-    scripts/C4.csv
-    scripts/C5.csv
-    scripts/C6.csv
-    scripts/C7.csv
-    scripts/C8.csv
+    data/C1.csv
+    data/C2.csv
+    data/C3.csv
+    data/C4.csv
+    data/C5.csv
+    data/C6.csv
+    data/C7.csv
+    data/C8.csv
   DESTINATION lib/${PROJECT_NAME}
 )
 
