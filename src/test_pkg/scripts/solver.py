@@ -9,7 +9,7 @@ model = MagneticModel()
 
 ## Generating skew-symmetric matrix ###############################################################
 def generate_SkewMat(vector: np.ndarray) -> np.ndarray:
-    x, y, z = vector.flatten()                              # vector must be numpy (3, 1) array
+    x, y, z = vector.flatten()                                  # vector must be numpy (3, 1) array
 
     return np.array([
         [0.0, -z, +y],
@@ -49,20 +49,17 @@ def compute_Tikhonov(
 
     return SOL_OPT
 
-## Solving actuation matrix ###################################################################
+## Solving actuation matrix #######################################################################
 class ActuationModel:
 
     def __init__(
         self,
-        robot_design: RobotDesign,                                       # robot_design
-        robot_position: np.ndarray,             # estimated position of magnetic robot's COM
-        robot_orientation: float,           # estimated orientation of magnetic robot
-        desired_torque: np.ndarray,                             # desired torque
-        desired_force: np.ndarray,                               # desired force
-        current_vector: np.ndarray = None, # current vector for response computation, default: None
-        use_tikhonov: bool = True, # use Tikhonov regularization or not, default: True
-        tikhonov_parameterRange: np.ndarray = np.logspace(-10, 4, 1000),           # Tikhonov regularization parameter_range, default: None
-        norm_maximum: float = 13.0, # maximum norm of solution vector, default: 13 A
+        robot_design: RobotDesign,                                                   # robot_design
+        robot_position: np.ndarray,                    # estimated position of magnetic robot's COM
+        robot_orientation: float,                         # estimated orientation of magnetic robot
+        desired_torque: np.ndarray,                                                # desired torque
+        desired_force: np.ndarray,                                                  # desired force
+        solve_method: str = "tikhonov",  # solve method ("tikhonov" or "pinv"), default: "tikhonov"
         ):
 
         self.robot_design = robot_design
@@ -70,9 +67,12 @@ class ActuationModel:
         self.robot_orientation = robot_orientation
         self.desired_torque = desired_torque
         self.desired_force = desired_force
+        self.solve_method = solve_method
         
-        POS = robot_position
-        theta = robot_orientation
+        POS = self.robot_position
+        theta = self.robot_orientation
+        T_DES = self.desired_torque
+        F_DES = self.desired_force
 
         self.ROT_Z = np.array([
             [+np.cos(theta), -np.sin(theta), 0.0],
@@ -80,8 +80,8 @@ class ActuationModel:
             [0.0, 0.0, 1.0],
             ])
         
-        self.rw = {} # robot_position vectors in global coordinate system
-        self.mw = {}    # magnetization in global coordinate system
+        self.rw = {}                           # robot_position vectors in global coordinate system
+        self.mw = {}                                    # magnetization in global coordinate system
         self.sk_rw = {}
         self.sk_mw = {}
         self.tm_gain = {}
@@ -105,59 +105,45 @@ class ActuationModel:
                 (self.mw[key].T).dot(model.map_GradGain(self.rw[key], axis=1)),
                 (self.mw[key].T).dot(model.map_GradGain(self.rw[key], axis=2)),
             ))
-        
-        self.OUTPUT = np.vstack((self.ROT_Z.dot(desired_torque), self.ROT_Z.dot(desired_force)))
+
+        self.OUTPUT = np.vstack((self.ROT_Z.dot(T_DES), self.ROT_Z.dot(F_DES)))
 
         self.TM_GAIN = sum(self.tm_gain.values())
         self.TF_GAIN = sum(self.sk_rw[name].dot(self.f_gain[name]) for name in self.f_gain)
         self.ACT_MAT = np.vstack((self.TM_GAIN + self.TF_GAIN, self.f_gain['O']))
+    
+        if self.solve_method == "pinv":
+            self.CURR_VEC = np.linalg.pinv(self.ACT_MAT).dot(self.OUTPUT)
 
-        self.I_OPT = self.solve_Current(
-            use_tikhonov=use_tikhonov,
-            tikhonov_params=tikhonov_params,
-            norm_maximum=norm_maximum,
-        )
+        elif self.solve_method == "tikhonov":
+            self.CURR_VEC = compute_Tikhonov(
+                coefficient_matrix=self.ACT_MAT,
+                desired_vector=self.OUTPUT,
+                parameter_range=np.logspace(-10, 4, 1000),
+                norm_maximum=13.0,
+            )
 
-        self.compute_Response(current_vector)
-
-    def compute_Response(self, current_vector=None):
-        if current_vector is None:
-            current_vector = self.I_OPT
-        self.CUR_VEC = current_vector
+        else:
+            raise ValueError(f"Unknown method: {self.solve_method}")
+        
+    def compute_Response(self):
 
         self.b = {}
         self.tm = {}
         self.f = {}
 
         for key in self.robot_design.rb.keys():
-            self.b[key] = model.map_FieldGain(self.rw[key]).dot(self.CUR_VEC)
+            self.b[key] = model.map_FieldGain(self.rw[key]).dot(self.CURR_VEC)
 
         for key in self.robot_design.rb.keys():
             self.tm[key] = self.sk_mw[key].dot(self.b[key])
             self.f[key] = np.vstack((
-                (self.mw[key].T).dot(model.map_GradGain(self.rw[key], axis=0).dot(self.CUR_VEC)),
-                (self.mw[key].T).dot(model.map_GradGain(self.rw[key], axis=1).dot(self.CUR_VEC)),
-                (self.mw[key].T).dot(model.map_GradGain(self.rw[key], axis=2).dot(self.CUR_VEC)),
+                (self.mw[key].T).dot(model.map_GradGain(self.rw[key], axis=0).dot(self.CURR_VEC)),
+                (self.mw[key].T).dot(model.map_GradGain(self.rw[key], axis=1).dot(self.CURR_VEC)),
+                (self.mw[key].T).dot(model.map_GradGain(self.rw[key], axis=2).dot(self.CURR_VEC)),
             ))
 
-        self.F_TOT = sum(self.f.values())
-        self.TM_TOT = sum(self.tm.values())
-        self.TF_TOT = sum(self.sk_rw[name].dot(self.f[name]) for name in self.f)
-        self.T_TOT = (self.ROT_Z.T).dot(self.TM_TOT + self.TF_TOT)
-
-    def map_Field(self, robot_position):
-        return model.map_FieldGain(robot_position).dot(self.CUR_VEC)
-
-    def solve_Current(self, use_tikhonov=True, tikhonov_params=None, norm_maximum=13):
-        if not use_tikhonov:
-            return np.linalg.pinv(self.ACT_MAT).dot(self.OUTPUT)
-
-        if tikhonov_params is None:
-            tikhonov_params = np.logspace(-10, 4, 1000)
-
-        return compute_Tikhonov(
-            coefficient_matrix=self.ACT_MAT,
-            desired_vector=self.OUTPUT,
-            parameter_range=tikhonov_params,
-            norm_maximum=norm_maximum,
-        )
+        self.F = sum(self.f.values())
+        self.TM = sum(self.tm.values())
+        self.TF = sum(self.sk_rw[name].dot(self.f[name]) for name in self.f)
+        self.T = (self.ROT_Z.T).dot(self.TM + self.TF)
