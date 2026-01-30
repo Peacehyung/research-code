@@ -87,18 +87,18 @@ class ActuationModel:
         self.tm_gain = {}
         self.f_gain = {}
                 
-        for key, value in robot_design.rb.items():
+        for key, value in self.robot_design.rb.items():
             R_ROT = self.ROT_Z.dot(value)
             R_SHIFT = POS + self.ROT_Z.dot(value)
             self.rw[key] = R_SHIFT
             self.sk_rw[key] = generate_SkewMat(R_ROT)
 
-        for key, value in robot_design.mb.items():
+        for key, value in self.robot_design.mb.items():
             M_ROT = self.ROT_Z.dot(value)
             self.mw[key] = M_ROT
             self.sk_mw[key] = generate_SkewMat(M_ROT)
 
-        for key in robot_design.rb.keys():
+        for key in self.robot_design.rb.keys():
             self.tm_gain[key] = self.sk_mw[key].dot(model.map_FieldGain(self.rw[key]))
             self.f_gain[key] = np.vstack((
                 (self.mw[key].T).dot(model.map_GradGain(self.rw[key], axis=0)),
@@ -157,3 +157,6 @@ class ActuationModel:
         self.TM = sum(self.tm.values())
         self.TF = sum(self.sk_rw[name].dot(self.f[name]) for name in self.f)
         self.T = (self.ROT_Z.T).dot(self.TM + self.TF)
+
+    def compute_Field(self, position: np.ndarray) -> np.ndarray:
+        return model.map_FieldGain(position).dot(self.CURR_VEC) 

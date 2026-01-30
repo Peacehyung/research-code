@@ -1,11 +1,25 @@
 #!/usr/bin/env python3
 
 ## Header #########################################################################################
-import argparse
-import matplotlib.pyplot as plt
 import numpy as np
-from structure import *
+import matplotlib.pyplot as plt
+from structure import RobotDesign
 from solver import ActuationModel
+
+## Robot objects ##################################################################################
+Robot1 = RobotDesign(                                                             # Giltinan et al.
+    magnet_distance=0.1,
+    moment_value=4.4e-12,
+    number_magnets=5,
+    pattern="e5",
+    )
+
+Robot = RobotDesign(
+    magnet_distance=2.5,
+    moment_value=0.001875,
+    number_magnets=3,
+    pattern="e5",
+    )
 
 ## Plotting actuation response WRT input 6-DoF orientation ########################################
 def plot_response():
@@ -17,20 +31,14 @@ def plot_response():
 
     while theta <= 2 * np.pi:
 
-        Robot = RobotDesign(
-            magnet_distance=2.5,
-            moment_value=0.001875,
-            number_magnets=3,
-            pattern="e5",
-        )
-
         Act = ActuationModel(
             robot_design=Robot,
             robot_position=np.array([[60.0], [60.0], [64.0]]),
             robot_orientation=theta,
             desired_torque=np.array([[0.0], [0.0], [0.007]]),
             desired_force=np.array([[0.0], [0.0], [0.0]]),
-        )
+            solve_method="pinv",
+            )
 
         Act.compute_Response()
 
@@ -93,28 +101,25 @@ def plot_torque_map():
         for j, delta_deg in enumerate(delta_rng):
             delta_rad = np.deg2rad(delta_deg)
 
-            Robot = RobotDesign(  # Giltinan et al.
-                magnet_distance=0.1,
-                moment_value=4.4e-12,
-                number_magnets=5,
-                pattern="e5",
-            )
+
 
             InputAct = ActuationModel(
-                robot_design=Robot,
+                robot_design=Robot1,
                 robot_position=np.array([[60.0], [60.0], [64.0]]),
                 robot_orientation=delta_rad,
                 desired_torque=np.array([[0.0], [0.0], [0.007]]),
                 desired_force=np.array([[0.0], [0.0], [0.0]]),
-            )            
+                solve_method="tikhonov",
+                )            
 
             RobotAct = ActuationModel(
-                robot_design=Robot,
+                robot_design=Robot1,
                 robot_position=np.array([[60.0], [60.0], [64.0]]),
                 robot_orientation=theta_rad,
                 desired_torque=np.array([[0.0], [0.0], [0.007]]),
-                desired_force=np.array([[0.0], [0.0], [0.0]]),                
-            )
+                desired_force=np.array([[0.0], [0.0], [0.0]]),
+                solve_method="pinv",
+                )
 
             RobotAct.compute_Response(current_vector=InputAct.CURR_VEC)
 
@@ -123,13 +128,14 @@ def plot_torque_map():
     theta_grid, delta_grid = np.meshgrid(delta_rng, theta_rng)
 
     plt.figure(figsize=(10, 8))
+    
     contour = plt.contourf(
         delta_grid,
         theta_grid,
         T_GRID,
         cmap="viridis",
         levels=np.linspace(np.min(T_GRID), np.max(T_GRID), 50),
-    )
+        )
 
     plt.colorbar(contour, label="Generated Torque (Tz)")
     plt.contour(delta_grid, theta_grid, T_GRID, levels=[0], colors="red", linewidths=1.5)
@@ -145,8 +151,8 @@ def plot_torque_map():
 
 ## Main function ##################################################################################
 def main():
-    # plot_response()
-    plot_torque_map()        
+    plot_response()
+    # plot_torque_map()        
 
 ## Execution ######################################################################################
 if __name__ == "__main__":

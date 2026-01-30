@@ -1,83 +1,80 @@
 #!/usr/bin/env python3
 
-## Header ##########################################################
+## Header #########################################################################################
 import rclpy
-import time
 import signal
 import numpy as np
-from structure import *
+from structure import RobotDesign
 from solver import ActuationModel
 from markers import *
 
-## ROS signal shutdown #############################################
-## Main function ###################################################
-test_mode = False
-theta = 0.0                                    # initial orientation
-Res = np.array([8.80, 8.00, 8.40, 8.60,    # resistance of each coil
-                8.40, 8.70, 8.50, 8.60])
-
-def experiment():
+## Streaming field result and estimated orientation ###############################################
+def stream_State():
+    theta = 0.0                                                               # initial orientation
 
     rclpy.init()
-    node = rclpy.create_node('experiment')
+    node = rclpy.create_node('stream_')
+
+    shutting_down = {"value": False}
 
     def signal_handler(signal, frame):
+        if shutting_down["value"]:
+            return
+        shutting_down["value"] = True
         node.get_logger().info('You pressed Ctrl+C! Exiting...')
-        rclpy.shutdown()
+        if rclpy.ok():
+            rclpy.shutdown()
 
     signal.signal(signal.SIGINT, signal_handler)
 
-    field = ArrowArray(node, 'field')
+    b_array = ArrowArray(node, 'b_array')
     r1 = MarkerPoint(node, 'r1')
     r3 = MarkerPoint(node, 'r3')
 
-    global theta
-
     while rclpy.ok():
-    # while theta <= 2*np.pi:
 
-        Structure1 = RobotDesign(
+        Robot = RobotDesign(
             magnet_distance=2.5,
             moment_value=0.001875,
             number_magnets=3,
             pattern="e5",
             )
 
-        Eval = ActuationModel(
-            structure=Structure1,
-            position=np.array([[60.0], [60.0], [64.0]]),
-            orientation=theta,
+        Act = ActuationModel(
+            robot_design=Robot,
+            robot_position=np.array([[0.0], [0.0], [0.0]]),
+            robot_orientation=theta,
             desired_torque=np.array([[0.0], [0.0], [0.007]]),
             desired_force=np.array([[0.0], [0.0], [0.0]]),
             )
+
+        # b_array.publish_arrow_array(spacing=2.5/4,
+        #                           num_grid=15,
+        #                           shaft_thick=0.05,
+        #                           head_size=0.2,
+        #                           color=yellow,
+        #                           vector_function=Act.compute_Field())
+
+        r1.publish_Point(radius=0.5,
+                         color=MarkerColors().red, 
+                         position=Act.rw['1'])
         
-        V = Eval.I_OPT.flatten() * Res
-
-        print(Eval.I_OPT)
-
-        field.publish_arrow_array(spacing=2.5/4,
-                                  num_grid=15,
-                                  shaft_thick=0.05,
-                                  head_size=0.2,
-                                  color=yellow,
-                                  vector_function=Eval.map_Field)
-
-        r1.publish_point(radius=0.5,
-                         color=red, 
-                         position=Eval.r_w['1'].flatten())
-        
-        r3.publish_point(radius=0.5,
-                         color=blue,
-                         position=Eval.r_w['3'].flatten())
+        r3.publish_Point(radius=0.5,
+                         color=MarkerColors().blue,
+                         position=Act.rw['3'])
 
         theta += np.pi/180
 
         rclpy.spin_once(node, timeout_sec=0.0)
-        time.sleep(0.1)
 
     node.destroy_node()
-    rclpy.shutdown()
+    if rclpy.ok():
+        rclpy.shutdown()
 
-## Execution #######################################################
-if __name__ == '__main__':
-    experiment()
+## Main function ##################################################################################
+def main():
+    stream_State()
+
+## Execution ######################################################################################
+if __name__ == "__main__":
+    main()
