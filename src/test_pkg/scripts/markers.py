@@ -139,13 +139,13 @@ class ArrowArray(MarkerArrow):
                             head_size,
                             color,
                             vector_function):
-        if spacing <= 0:
-            raise ValueError("spacing must be > 0")
-        if num_grid <= 0:
-            raise ValueError("num_grid must be > 0")
-        self._validate_vec3(color, "color")
-        if vector_function is None:
-            raise ValueError("vector_function must be provided")
+        # if spacing <= 0:
+        #     raise ValueError("spacing must be > 0")
+        # if num_grid <= 0:
+        #     raise ValueError("num_grid must be > 0")
+        # self._validate_vec3(color, "color")
+        # if vector_function is None:
+        #     raise ValueError("vector_function must be provided")
         
         marker_array = MarkerArray()
         id_count = 0
@@ -156,11 +156,11 @@ class ArrowArray(MarkerArrow):
             for j in range(num_grid):
                 x = spacing * i - offset
                 y = spacing * j - offset
-                z = 60.0
+                z = 0.0
 
-                vector_field = vector_function(np.array([[x], [y], [z]])) / 100
+                vector_field = vector_function(np.array([[x], [y], [z]]))
                 vector_field = np.asarray(vector_field).flatten()
-                self._validate_vec3(vector_field, "vector_field")
+                # self._validate_vec3(vector_field, "vector_field")
 
                 marker = self.create_ArrowMarker(shaft_thick=shaft_thick,
                                                   head_size=head_size,

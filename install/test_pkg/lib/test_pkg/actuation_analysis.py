@@ -5,12 +5,22 @@ import numpy as np
 import matplotlib.pyplot as plt
 from structure import RobotDesign
 from solver import ActuationModel
-Robot = RobotDesign(
+
+## Robot objects ##################################################################################
+Robot1 = RobotDesign(                                                             # Giltinan et al.
+    magnet_distance=0.1,
+    moment_value=4.4e-12,
+    number_magnets=5,
+    pattern="e5",
+    )
+
+Robot2 = RobotDesign(
     magnet_distance=2.5,
     moment_value=0.001875,
     number_magnets=3,
     pattern="e5",
     )
+
 ## Plotting actuation response WRT input 6-DoF orientation ########################################
 def plot_response():
     theta = 0.0                                                               # initial orientation
@@ -20,18 +30,16 @@ def plot_response():
     fx_list, fy_list, fz_list = [], [], []
 
     while theta <= 2 * np.pi:
-
-
-
+        
         Act = ActuationModel(
-            robot_design=Robot,
+            robot_design=Robot2,
             robot_position=np.array([[60.0], [60.0], [64.0]]),
             robot_orientation=theta,
             desired_torque=np.array([[0.0], [0.0], [0.007]]),
             desired_force=np.array([[0.0], [0.0], [0.0]]),
-            solve_method="pinv",
+            solve_method="tikhonov",
             )
-
+        
         Act.compute_Response()
 
         theta_list.append(theta / np.pi * 180)
@@ -93,13 +101,6 @@ def plot_torque_map():
         for j, delta_deg in enumerate(delta_rng):
             delta_rad = np.deg2rad(delta_deg)
 
-            Robot1 = RobotDesign(                                                 # Giltinan et al.
-                magnet_distance=0.1,
-                moment_value=4.4e-12,
-                number_magnets=5,
-                pattern="e5",
-                )
-
             InputAct = ActuationModel(
                 robot_design=Robot1,
                 robot_position=np.array([[60.0], [60.0], [64.0]]),
@@ -107,7 +108,9 @@ def plot_torque_map():
                 desired_torque=np.array([[0.0], [0.0], [0.007]]),
                 desired_force=np.array([[0.0], [0.0], [0.0]]),
                 solve_method="tikhonov",
-                )            
+                )
+
+            InputAct._solve_Tikhonov(norm_maximum=18.0)            
 
             RobotAct = ActuationModel(
                 robot_design=Robot1,
@@ -115,7 +118,6 @@ def plot_torque_map():
                 robot_orientation=theta_rad,
                 desired_torque=np.array([[0.0], [0.0], [0.007]]),
                 desired_force=np.array([[0.0], [0.0], [0.0]]),
-                solve_method="pinv",
                 )
 
             RobotAct.compute_Response(current_vector=InputAct.CURR_VEC)
@@ -148,8 +150,8 @@ def plot_torque_map():
 
 ## Main function ##################################################################################
 def main():
-    plot_response()
-    # plot_torque_map()        
+    # plot_response()
+    plot_torque_map()        
 
 ## Execution ######################################################################################
 if __name__ == "__main__":
