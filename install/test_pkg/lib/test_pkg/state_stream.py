@@ -36,10 +36,11 @@ def experiment():
     while rclpy.ok():
     # while theta <= 2*np.pi:
 
-        Structure1 = RobotDesign1(
-            distance=2.5, 
+        Structure1 = RobotDesign(
+            magnet_distance=2.5,
             moment_value=0.001875,
             number_magnets=3,
+            pattern="e5",
             )
 
         Eval = ActuationModel(
@@ -50,24 +51,24 @@ def experiment():
             desired_force=np.array([[0.0], [0.0], [0.0]]),
             )
         
-        V = Eval.Iopt.flatten() * Res
+        V = Eval.I_OPT.flatten() * Res
 
-        print(Eval.Iopt)
+        print(Eval.I_OPT)
 
         field.publish_arrow_array(spacing=2.5/4,
                                   num_grid=15,
                                   shaft_thick=0.05,
                                   head_size=0.2,
                                   color=yellow,
-                                  vector_function=Eval.comField)
+                                  vector_function=Eval.map_Field)
 
         r1.publish_point(radius=0.5,
                          color=red, 
-                         position=Eval.rW['1'].flatten())
+                         position=Eval.r_w['1'].flatten())
         
         r3.publish_point(radius=0.5,
                          color=blue,
-                         position=Eval.rW['3'].flatten())
+                         position=Eval.r_w['3'].flatten())
 
         theta += np.pi/180
 

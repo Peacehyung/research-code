@@ -1,166 +1,151 @@
 #!/usr/bin/env python3
 
-## Header ##########################################################
+## Header #########################################################################################
 import numpy as np
 from magnetism import MagneticModel
+from structure import RobotDesign
 
-_MODEL = MagneticModel()
+model = MagneticModel()
 
-## Skew-symmetric matrix ###########################################
-def genSkewMat(vector):
-    x, y, z = vector.flatten()    # value must be numpy (3, 1) array
+## Generating skew-symmetric matrix ###############################################################
+def generate_SkewMat(vector: np.ndarray) -> np.ndarray:
+    x, y, z = vector.flatten()                                  # vector must be numpy (3, 1) array
 
     return np.array([
         [0.0, -z, +y],
         [+z, 0.0, -x],
         [-y, +x, 0.0],
         ])
-## Tikhonov regularization with solution norm constraint ###########
-def comTikhonov(
-        coefficient_matrix,
-        desired_vector,
-        parameters,
-        norm_maximum, 
-        ):
-    
-    cMat = coefficient_matrix
-    D = desired_vector
-    
-    U, mW, VT = np.linalg.svd(cMat, full_matrices=False)
-    residual_norms, solutions = [], []
 
-    for param in parameters:
-        filt = mW / (mW**2 + param**2)
+## Tikhonov regularization with solution norm constraint ##########################################
+def compute_Tikhonov(
+        coefficient_matrix: np.ndarray,
+        desired_vector: np.ndarray,
+        parameter_range: np.ndarray,
+        norm_maximum: float,
+        ) -> np.ndarray:
+    
+    COEFF = coefficient_matrix
+    DES_VEC = desired_vector
+    params = parameter_range
+    
+    U, W, VT = np.linalg.svd(COEFF, full_matrices=False)
+    resi_norms, sols = [], []
 
-        sol = VT.T.dot(filt[:, np.newaxis] * (U.T.dot(D)))
-        # sol = (VT.T * filt).dot((U.T.dot(des_vec)))
-        res_norm = np.linalg.norm((cMat.dot(sol)) - D)
-        sol_norm = np.linalg.norm(sol)
+    for param in params:
+        FILT = W / (W**2 + param**2)
+
+        SOL = VT.T.dot(FILT[:, np.newaxis] * (U.T.dot(DES_VEC)))
+        # SOL = (VT.T * FILT).dot((U.T.dot(DES_VEC)))
+        resi_norm = np.linalg.norm((COEFF.dot(SOL)) - DES_VEC)
+        sol_norm = np.linalg.norm(SOL)
 
         if sol_norm <= norm_maximum:
-            solutions.append(sol)
-            residual_norms.append(res_norm)
+            sols.append(SOL)
+            resi_norms.append(resi_norm)
 
-    best_idx = np.argmin(residual_norms)
-    sol_opt = solutions[best_idx]
+    best_idx = np.argmin(resi_norms)
+    SOL_OPT = sols[best_idx]
 
-    return sol_opt
+    return SOL_OPT
 
-## Solving actuation matrix ########################################
+## Solving actuation matrix #######################################################################
 class ActuationModel:
 
     def __init__(
         self,
-        structure,                                       # structure
-        position,             # estimated position of magnetic robot's center
-        orientation,           # estimated orientation of magnetic robot
-        # desired_Bz,
-        desired_torque,                             # desired torque
-        desired_force,                               # desired force
-        current_vector=None,
-        use_tikhonov=True,
-        tikhonov_params=None,
-        norm_maximum=13,
+        robot_design: RobotDesign,                                                   # robot_design
+        robot_position: np.ndarray,                    # estimated position of magnetic robot's COM
+        robot_orientation: float,                         # estimated orientation of magnetic robot
+        desired_torque: np.ndarray,                                                # desired torque
+        desired_force: np.ndarray,                                                  # desired force
+        solve_method: str = "tikhonov",  # solve method ("tikhonov" or "pinv"), default: "tikhonov"
         ):
 
-        self.structure = structure
-        self.position = position
-        self.orientation = orientation
-        # self.desired_Bz = desired_Bz
+        self.robot_design = robot_design
+        self.robot_position = robot_position
+        self.robot_orientation = robot_orientation
         self.desired_torque = desired_torque
         self.desired_force = desired_force
+        self.solve_method = solve_method
         
-        pos = position
-        theta = orientation
+        POS = self.robot_position
+        theta = self.robot_orientation
+        T_DES = self.desired_torque
+        F_DES = self.desired_force
 
-        self.rotZ = np.array([
+        self.ROT_Z = np.array([
             [+np.cos(theta), -np.sin(theta), 0.0],
             [+np.sin(theta), +np.cos(theta), 0.0],
             [0.0, 0.0, 1.0],
             ])
         
-        self.rW = {} # position vectors in global coordinate system
-        self.mW = {}    # magnetization in global coordinate system
-        self.sk_R = {}
-        self.sk_M = {}
-        self.Tm_gain = {}
-        self.F_gain = {}
+        self.rw = {}                           # robot_position vectors in global coordinate system
+        self.mw = {}                                    # magnetization in global coordinate system
+        self.sk_rw = {}
+        self.sk_mw = {}
+        self.tm_gain = {}
+        self.f_gain = {}
                 
-        for key, value in structure.rL.items():
-            R_rotated = self.rotZ.dot(value)
-            R_shifted = pos + self.rotZ.dot(value)
-            self.rW[key] = R_shifted
-            self.sk_R[key] = genSkewMat(R_rotated)
+        for key, value in robot_design.rb.items():
+            R_ROT = self.ROT_Z.dot(value)
+            R_SHIFT = POS + self.ROT_Z.dot(value)
+            self.rw[key] = R_SHIFT
+            self.sk_rw[key] = generate_SkewMat(R_ROT)
 
-        for key, value in structure.mL.items():
-            M_rotated = self.rotZ.dot(value)
-            self.mW[key] = M_rotated
-            self.sk_M[key] = genSkewMat(M_rotated)
+        for key, value in robot_design.mb.items():
+            M_ROT = self.ROT_Z.dot(value)
+            self.mw[key] = M_ROT
+            self.sk_mw[key] = generate_SkewMat(M_ROT)
 
-        for key in structure.rL.keys():
-            self.Tm_gain[key] = self.sk_M[key].dot(_MODEL.map_FieldGain(self.rW[key]))
-            self.F_gain[key] = np.vstack((
-                (self.mW[key].T).dot(_MODEL.map_GradGain(self.rW[key], axis=0)),
-                (self.mW[key].T).dot(_MODEL.map_GradGain(self.rW[key], axis=1)),
-                (self.mW[key].T).dot(_MODEL.map_GradGain(self.rW[key], axis=2)),
+        for key in robot_design.rb.keys():
+            self.tm_gain[key] = self.sk_mw[key].dot(model.map_FieldGain(self.rw[key]))
+            self.f_gain[key] = np.vstack((
+                (self.mw[key].T).dot(model.map_GradGain(self.rw[key], axis=0)),
+                (self.mw[key].T).dot(model.map_GradGain(self.rw[key], axis=1)),
+                (self.mw[key].T).dot(model.map_GradGain(self.rw[key], axis=2)),
             ))
 
-        # self.Bz_gain = _MODEL.map_FieldGain(pos)[2:3, :]
+        self.OUTPUT = np.vstack((self.ROT_Z.dot(T_DES), self.ROT_Z.dot(F_DES)))
 
-        # self.Output = np.vstack((np.array([[desired_Bz]]), desired_torque, desired_force))
-        self.Output = np.vstack((self.rotZ.dot(desired_torque), self.rotZ.dot(desired_force)))
+        self.TM_GAIN = sum(self.tm_gain.values())
+        self.TF_GAIN = sum(self.sk_rw[name].dot(self.f_gain[name]) for name in self.f_gain)
+        self.ACT_MAT = np.vstack((self.TM_GAIN + self.TF_GAIN, self.f_gain['O']))
+    
+        if self.solve_method == "pinv":
+            self.CURR_VEC = np.linalg.pinv(self.ACT_MAT).dot(self.OUTPUT)
 
-        self.TmTot_gain = sum(self.Tm_gain.values())
-        self.TfTot_gain = sum(self.sk_R[name].dot(self.F_gain[name]) for name in self.F_gain)
-        # self.Act_mat = np.vstack((self.Bz_gain, self.TmTot_gain + self.TfTot_gain, self.F_gain['O']))
-        self.Act_mat = np.vstack((self.TmTot_gain + self.TfTot_gain, self.F_gain['O']))
+        elif self.solve_method == "tikhonov":
+            self.CURR_VEC = compute_Tikhonov(
+                coefficient_matrix=self.ACT_MAT,
+                desired_vector=self.OUTPUT,
+                parameter_range=np.logspace(-10, 4, 1000),
+                norm_maximum=13.0,
+            )
 
-        self.Iopt = self.solve_current(
-            use_tikhonov=use_tikhonov,
-            tikhonov_params=tikhonov_params,
-            norm_maximum=norm_maximum,
-        )
+        else:
+            raise ValueError(f"Unknown method: {self.solve_method}")
+        
+        self._compute_Response()
+        
+    def _compute_Response(self):
 
-        self.compute_response(current_vector)
+        self.b = {}
+        self.tm = {}
+        self.f = {}
 
-    def compute_response(self, current_vector=None):
-        if current_vector is None:
-            current_vector = self.Iopt
-        self.current_vector = current_vector
+        for key in self.robot_design.rb.keys():
+            self.b[key] = model.map_FieldGain(self.rw[key]).dot(self.CURR_VEC)
 
-        self.B = {}
-        self.Tm = {}
-        self.F = {}
-
-        for key in self.structure.rL.keys():
-            self.B[key] = _MODEL.map_FieldGain(self.rW[key]).dot(self.current_vector)
-
-        for key in self.structure.rL.keys():
-            self.Tm[key] = self.sk_M[key].dot(self.B[key])
-            self.F[key] = np.vstack((
-                (self.mW[key].T).dot(_MODEL.map_GradGain(self.rW[key], axis=0).dot(self.current_vector)),
-                (self.mW[key].T).dot(_MODEL.map_GradGain(self.rW[key], axis=1).dot(self.current_vector)),
-                (self.mW[key].T).dot(_MODEL.map_GradGain(self.rW[key], axis=2).dot(self.current_vector)),
+        for key in self.robot_design.rb.keys():
+            self.tm[key] = self.sk_mw[key].dot(self.b[key])
+            self.f[key] = np.vstack((
+                (self.mw[key].T).dot(model.map_GradGain(self.rw[key], axis=0).dot(self.CURR_VEC)),
+                (self.mw[key].T).dot(model.map_GradGain(self.rw[key], axis=1).dot(self.CURR_VEC)),
+                (self.mw[key].T).dot(model.map_GradGain(self.rw[key], axis=2).dot(self.CURR_VEC)),
             ))
 
-        self.Ftot = sum(self.F.values())
-        self.TmTot = sum(self.Tm.values())
-        self.TfTot = sum(self.sk_R[name].dot(self.F[name]) for name in self.F)
-        self.Ttot = (self.rotZ.T).dot(self.TmTot + self.TfTot)
-
-    def comField(self, position):
-        return _MODEL.map_FieldGain(position).dot(self.current_vector)
-
-    def solve_current(self, use_tikhonov=True, tikhonov_params=None, norm_maximum=13):
-        if not use_tikhonov:
-            return np.linalg.pinv(self.Act_mat).dot(self.Output)
-
-        if tikhonov_params is None:
-            tikhonov_params = np.logspace(-10, 4, 1000)
-
-        return comTikhonov(
-            coefficient_matrix=self.Act_mat,
-            desired_vector=self.Output,
-            parameters=tikhonov_params,
-            norm_maximum=norm_maximum,
-        )
+        self.F = sum(self.f.values())
+        self.TM = sum(self.tm.values())
+        self.TF = sum(self.sk_rw[name].dot(self.f[name]) for name in self.f)
+        self.T = (self.ROT_Z.T).dot(self.TM + self.TF)

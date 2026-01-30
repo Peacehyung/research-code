@@ -59,7 +59,6 @@ class ActuationModel:
         robot_orientation: float,                         # estimated orientation of magnetic robot
         desired_torque: np.ndarray,                                                # desired torque
         desired_force: np.ndarray,                                                  # desired force
-        solve_method: str = "tikhonov",  # solve method ("tikhonov" or "pinv"), default: "tikhonov"
         ):
 
         self.robot_design = robot_design
@@ -67,7 +66,6 @@ class ActuationModel:
         self.robot_orientation = robot_orientation
         self.desired_torque = desired_torque
         self.desired_force = desired_force
-        self.solve_method = solve_method
         
         POS = self.robot_position
         theta = self.robot_orientation
@@ -112,10 +110,15 @@ class ActuationModel:
         self.TF_GAIN = sum(self.sk_rw[name].dot(self.f_gain[name]) for name in self.f_gain)
         self.ACT_MAT = np.vstack((self.TM_GAIN + self.TF_GAIN, self.f_gain['O']))
     
-        if self.solve_method == "pinv":
+        self._solve_Current()
+        self._compute_Response()
+
+    def _solve_Current(self, solve_method: str = "tikhonov"):  # solve method ("tikhonov" or "pinv"), default: "tikhonov"
+
+        if solve_method == "pinv":
             self.CURR_VEC = np.linalg.pinv(self.ACT_MAT).dot(self.OUTPUT)
 
-        elif self.solve_method == "tikhonov":
+        elif solve_method == "tikhonov":
             self.CURR_VEC = compute_Tikhonov(
                 coefficient_matrix=self.ACT_MAT,
                 desired_vector=self.OUTPUT,
@@ -124,9 +127,10 @@ class ActuationModel:
             )
 
         else:
-            raise ValueError(f"Unknown method: {self.solve_method}")
+            raise ValueError(f"Unknown method: {solve_method}")
         
-    def compute_Response(self):
+        
+    def _compute_Response(self):
 
         self.b = {}
         self.tm = {}

@@ -39,6 +39,11 @@ class RobotDesign:
                 '2': np.array([[0.0], [+d], [0.0]]),
                 '4': np.array([[0.0], [-d], [0.0]]),
                 })
+            
+        self._apply_pattern()
+
+    def _apply_pattern(self):
+        m = self.moment_value
 
         if self.pattern == "e5":                              # magnetization pattern maximizing e5
             if self.number_magnets >= 3:
