@@ -7,39 +7,42 @@ import numpy as np
 from structure import *
 from solver import ActuationModel
 
-## Response plot ###################################################
+## Response plot ##################################################################################
 def plot_response(show=True):
-    theta = 0.0  # initial orientation
+    theta = 0.0                                                               # initial orientation
 
     theta_list, I1_list, I2_list = [], [], []
-    Ttotx_list, Ttoty_list, Ttotz_list = [], [], []
-    Ftotx_list, Ftoty_list, Ftotz_list = [], [], []
+    tx_list, ty_list, tz_list = [], [], []
+    fx_list, fy_list, fz_list = [], [], []
 
     while theta <= 2 * np.pi:
-        Structure1 = RobotDesign(
+
+        Robot = RobotDesign(
             magnet_distance=2.5,
             moment_value=0.001875,
             number_magnets=3,
             pattern="e5",
         )
 
-        Eval = ActuationModel(
-            robot_design=Structure1,
+        Act = ActuationModel(
+            robot_design=Robot,
             robot_position=np.array([[60.0], [60.0], [64.0]]),
             robot_orientation=theta,
             desired_torque=np.array([[0.0], [0.0], [0.007]]),
             desired_force=np.array([[0.0], [0.0], [0.0]]),
         )
 
+        Act.compute_Response()
+        
         theta_list.append(theta / np.pi * 180)
-        I1_list.append(Eval.CURR_VEC.flatten()[0])
-        I2_list.append(Eval.CURR_VEC.flatten()[1])
-        Ttotx_list.append(Eval.T.flatten()[0])
-        Ttoty_list.append(Eval.T.flatten()[1])
-        Ttotz_list.append(Eval.T.flatten()[2])
-        Ftotx_list.append(Eval.F.flatten()[0])
-        Ftoty_list.append(Eval.F.flatten()[1])
-        Ftotz_list.append(Eval.F.flatten()[2])
+        I1_list.append(Act.CURR_VEC.flatten()[0])
+        I2_list.append(Act.CURR_VEC.flatten()[1])
+        tx_list.append(Act.T.flatten()[0])
+        ty_list.append(Act.T.flatten()[1])
+        tz_list.append(Act.T.flatten()[2])
+        fx_list.append(Act.F.flatten()[0])
+        fy_list.append(Act.F.flatten()[1])
+        fz_list.append(Act.F.flatten()[2])
 
         theta += np.pi / 180
 
@@ -54,9 +57,9 @@ def plot_response(show=True):
     plt.grid(True)
 
     plt.figure(2)
-    plt.plot(theta_list, Ttotx_list, "r", label="Tm + Tf (x)", linewidth=2)
-    plt.plot(theta_list, Ttoty_list, "b", label="Tm + Tf (y)", linewidth=2)
-    plt.plot(theta_list, Ttotz_list, "k", label="Tm + Tf (z)", linewidth=2)
+    plt.plot(theta_list, tx_list, "r", label="Tm + Tf (x)", linewidth=2)
+    plt.plot(theta_list, ty_list, "b", label="Tm + Tf (y)", linewidth=2)
+    plt.plot(theta_list, tz_list, "k", label="Tm + Tf (z)", linewidth=2)
     plt.xlim(0, 360)
     plt.xticks(np.arange(0, 360, 45))
     plt.title("Torque Results")
@@ -65,9 +68,9 @@ def plot_response(show=True):
     plt.grid(True)
 
     plt.figure(3)
-    plt.plot(theta_list, Ftotx_list, "r", label="F (x)", linewidth=2)
-    plt.plot(theta_list, Ftoty_list, "b", label="F (y)", linewidth=2)
-    plt.plot(theta_list, Ftotz_list, "k", label="F (z)", linewidth=2)
+    plt.plot(theta_list, fx_list, "r", label="F (x)", linewidth=2)
+    plt.plot(theta_list, fy_list, "b", label="F (y)", linewidth=2)
+    plt.plot(theta_list, fz_list, "k", label="F (z)", linewidth=2)
     plt.xlim(0, 360)
     plt.xticks(np.arange(0, 360, 45))
     plt.title("Force Results")
