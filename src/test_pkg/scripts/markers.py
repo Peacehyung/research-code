@@ -103,6 +103,23 @@ class MarkerArrow(MarkerProperties):
         super().__init__(node, topic_name)
 
         self._create_Marker(marker_type=Marker.ARROW, marker_action=Marker.ADD)
+    
+    @staticmethod
+    def quaternion_from_euler(roll: np.ndarray, pitch: np.ndarray, yaw: np.ndarray) -> tuple:
+        
+        cy = np.cos(yaw * 0.5)
+        sy = np.sin(yaw * 0.5)
+        cp = np.cos(pitch * 0.5)
+        sp = np.sin(pitch * 0.5)
+        cr = np.cos(roll * 0.5)
+        sr = np.sin(roll * 0.5)
+
+        qx = sr * cp * cy - cr * sp * sy
+        qy = cr * sp * cy + sr * cp * sy
+        qz = cr * cp * sy - sr * sp * cy
+        qw = cr * cp * cy + sr * sp * sy
+
+        return (qx, qy, qz, qw)
 
     def publish_SingleArrow(
             self,
@@ -119,27 +136,23 @@ class MarkerArrow(MarkerProperties):
             marker_id=0,
             marker_scaleX=shaft_thick,
             marker_scaleY=head_size,
-            marker_scaleZ=None,
+            marker_scaleZ=0.5,
             marker_transparency=transparency,
             marker_color=color,
             )
 
-        pos = self.marker.pose.position
-        pos.x, pos.y, pos.z = (float(position[0]), float(position[1]), float(position[2]))
+        pos = position.flatten()
+        ori = orientation.flatten()
+        
+        self.marker.pose.position.x = float(pos[0])
+        self.marker.pose.position.y = float(pos[1])
+        self.marker.pose.position.z = float(pos[2])
 
-        ori = self.marker.pose.position
-        ori.x = float(position[0] + orientation[0])
-        ori.y = float(position[1] + orientation[1])
-        ori.z = float(position[2] + orientation[2])
-
-        self.marker.points.append(pos)                # initial point
-        self.marker.points.append(ori)                # terminal point
-
-        self.publisher.publish(self.marker)
-
-        self.marker.pose.position.x = float(position[0])
-        self.marker.pose.position.y = float(position[1])
-        self.marker.pose.position.z = float(position[2])
+        qx, qy, qz, qw = self.quaternion_from_euler(ori[0], ori[1], ori[2])
+        self.marker.pose.orientation.x = float(qx)
+        self.marker.pose.orientation.y = float(qy)
+        self.marker.pose.orientation.z = float(qz)
+        self.marker.pose.orientation.w = float(qw)
 
         self.publisher.publish(self.marker)
 

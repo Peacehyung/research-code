@@ -57,27 +57,30 @@ def stream_State():
         #                           color=MarkerColors().yellow,
         #                           vector_function=Act.compute_Field)
 
-        r1.publish_SinglePoint(radius=0.5,
-                         color=MarkerColors().red, 
-                         position=Act.rw['1'])
+        # r1.publish_SinglePoint(radius=0.5,
+        #                  color=MarkerColors().red, 
+        #                  position=Act.rw['1'])
         
-        r3.publish_SinglePoint(radius=0.5,
-                         color=MarkerColors().blue,
-                         position=Act.rw['3'])
+        # r3.publish_SinglePoint(radius=0.5,
+        #                  color=MarkerColors().blue,
+        #                  position=Act.rw['3'])
 
-        m1.publish_SingleArrow(shaft_thick=0.05,
-                               head_size=0.2,
+        m1.publish_SingleArrow(shaft_thick=1.0,
+                               head_size=0.5,
                                color=MarkerColors().red,
                                position=Act.rw['1'],
                                orientation=Act.mw['1'])
 
-        m3.publish_SingleArrow(shaft_thick=0.05,
-                               head_size=0.2,
+        m3.publish_SingleArrow(shaft_thick=1.0,
+                               head_size=0.5,
                                color=MarkerColors().blue,
                                position=Act.rw['3'],
                                orientation=Act.mw['3'])
 
-        theta += np.pi/180
+        # theta += np.pi/180
+
+        # print(Act.rw['1'].flatten(), Act.mw['1'].flatten())
+        # print(Act.rw['3'].flatten(), Act.mw['3'].flatten())
 
         rclpy.spin_once(node, timeout_sec=0.0)
 
