@@ -30,6 +30,8 @@ def stream_State():
     # b_array = ArrowArray(node, 'b_array')
     r1 = MarkerPoint(node, 'r1')
     r3 = MarkerPoint(node, 'r3')
+    m1 = MarkerArrow(node, 'm1')
+    m3 = MarkerArrow(node, 'm3')
 
     while rclpy.ok():
 
@@ -55,13 +57,25 @@ def stream_State():
         #                           color=MarkerColors().yellow,
         #                           vector_function=Act.compute_Field)
 
-        r1.publish_Point(radius=0.5,
+        r1.publish_SinglePoint(radius=0.5,
                          color=MarkerColors().red, 
                          position=Act.rw['1'])
         
-        r3.publish_Point(radius=0.5,
+        r3.publish_SinglePoint(radius=0.5,
                          color=MarkerColors().blue,
                          position=Act.rw['3'])
+
+        m1.publish_SingleArrow(shaft_thick=0.05,
+                               head_size=0.2,
+                               color=MarkerColors().red,
+                               position=Act.rw['1'],
+                               orientation=Act.mw['1'])
+
+        m3.publish_SingleArrow(shaft_thick=0.05,
+                               head_size=0.2,
+                               color=MarkerColors().blue,
+                               position=Act.rw['3'],
+                               orientation=Act.mw['3'])
 
         theta += np.pi/180
 

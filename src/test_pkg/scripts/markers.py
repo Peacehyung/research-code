@@ -34,7 +34,7 @@ class MarkerProperties:
     def _make_Header(self) -> Header:
         return Header(frame_id="map", stamp=self.node.get_clock().now().to_msg())
 
-    def _create_Marker(self, marker_type: function, marker_action: function):
+    def _create_Marker(self, marker_type: int, marker_action: int):
         self.marker = Marker()
         self.marker.header = self._make_Header()
         self.marker.type = marker_type
@@ -48,18 +48,18 @@ class MarkerProperties:
             marker_scaleY: float,
             marker_scaleZ: float,
             marker_transparency: float,
-            marker_color: np.ndarray
+            marker_color: np.ndarray,
             ):
         
         self.marker.ns = marker_namespace
         self.marker.id = marker_id
         self.marker.scale.x = marker_scaleX
         self.marker.scale.y = marker_scaleY
-        self.marker.scale.z = marker_scaleZ
-        self.marker.color.a = marker_transparency                             
-        self.marker.color.r = marker_color[0]
-        self.marker.color.g = marker_color[1]
-        self.marker.color.b = marker_color[2]
+        self.marker.scale.z = 0.0 if marker_scaleZ is None else marker_scaleZ
+        self.marker.color.a = marker_transparency
+        self.marker.color.r = float(marker_color[0])
+        self.marker.color.g = float(marker_color[1])
+        self.marker.color.b = float(marker_color[2])
 
 ## Point marker ###################################################################################
 class MarkerPoint(MarkerProperties):
@@ -88,9 +88,10 @@ class MarkerPoint(MarkerProperties):
             marker_color=color,
             )
 
-        self.marker.pose.position.x = float(position[0])
-        self.marker.pose.position.y = float(position[1])
-        self.marker.pose.position.z = float(position[2])
+        pos = position.flatten()
+        self.marker.pose.position.x = float(pos[0])
+        self.marker.pose.position.y = float(pos[1])
+        self.marker.pose.position.z = float(pos[2])
 
         self.publisher.publish(self.marker)
 
@@ -103,7 +104,7 @@ class MarkerArrow(MarkerProperties):
 
         self._create_Marker(marker_type=Marker.ARROW, marker_action=Marker.ADD)
 
-    def publish_SinglePoint(
+    def publish_SingleArrow(
             self,
             shaft_thick: float, 
             head_size: float, 
