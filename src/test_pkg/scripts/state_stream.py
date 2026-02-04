@@ -27,7 +27,7 @@ def stream_State():
 
     signal.signal(signal.SIGINT, signal_handler)
 
-    b_array = ArrowArray(node, 'b_array')
+    # b_array = ArrowArray(node, 'b_array')
     r1 = MarkerPoint(node, 'r1')
     r3 = MarkerPoint(node, 'r3')
 
@@ -48,12 +48,12 @@ def stream_State():
             desired_force=np.array([[0.0], [0.0], [0.0]]),
             )
 
-        b_array.publish_arrow_array(spacing=2.5/4,
-                                  num_grid=15,
-                                  shaft_thick=0.05,
-                                  head_size=0.2,
-                                  color=MarkerColors().yellow,
-                                  vector_function=Act.compute_Field)
+        # b_array.publish_arrow_array(spacing=2.5/4,
+        #                           num_grid=15,
+        #                           shaft_thick=0.05,
+        #                           head_size=0.2,
+        #                           color=MarkerColors().yellow,
+        #                           vector_function=Act.compute_Field)
 
         r1.publish_Point(radius=0.5,
                          color=MarkerColors().red, 

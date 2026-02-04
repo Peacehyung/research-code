@@ -110,7 +110,7 @@ def plot_torque_map():
                 solve_method="tikhonov",
                 )
 
-            InputAct._solve_Tikhonov(norm_maximum=18.0)            
+            InputAct._solve_Tikhonov(norm_maximum=15.0)            
 
             RobotAct = ActuationModel(
                 robot_design=Robot1,
