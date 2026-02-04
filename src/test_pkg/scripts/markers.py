@@ -4,6 +4,7 @@
 from rclpy.node import Node
 import numpy as np
 from std_msgs.msg import Header
+from geometry_msgs.msg import Point
 from visualization_msgs.msg import Marker, MarkerArray
 
 ## Marker colors ##################################################################################
@@ -21,15 +22,10 @@ class MarkerColors:
 ## Point marker ###################################################################################
 class MarkerProperties:
     
-    def __init__(
-            self,
-            node: Node,
-            topic_name: str,
-            ):
-
+    def __init__(self, node: Node, topic_name: str):
         self.node = node
-        self.publisher = node.create_publisher(Marker, topic_name, 10)
         self.topic_name = topic_name
+        self.publisher = self.node.create_publisher(Marker, self.topic_name, 10)
     
     def _make_Header(self) -> Header:
         return Header(frame_id="map", stamp=self.node.get_clock().now().to_msg())
@@ -41,21 +37,17 @@ class MarkerProperties:
         self.marker.action = marker_action
 
     def _set_MarkerStyle(
-            self,
-            marker_namespace: str,
-            marker_id: int,            
+            self,     
             marker_scaleX: float, 
             marker_scaleY: float,
             marker_scaleZ: float,
             marker_transparency: float,
             marker_color: np.ndarray,
             ):
-        
-        self.marker.ns = marker_namespace
-        self.marker.id = marker_id
+
         self.marker.scale.x = marker_scaleX
         self.marker.scale.y = marker_scaleY
-        self.marker.scale.z = 0.0 if marker_scaleZ is None else marker_scaleZ
+        self.marker.scale.z = marker_scaleZ
         self.marker.color.a = marker_transparency
         self.marker.color.r = float(marker_color[0])
         self.marker.color.g = float(marker_color[1])
@@ -68,8 +60,8 @@ class MarkerPoint(MarkerProperties):
         
         super().__init__(node, topic_name)
 
-        self._create_Marker(marker_type=Marker.SPHERE, marker_action=Marker.ADD)            
-        
+        self._create_Marker(marker_type=Marker.SPHERE, marker_action=Marker.ADD)
+
     def publish_SinglePoint(
             self,
             radius: float, 
@@ -77,17 +69,19 @@ class MarkerPoint(MarkerProperties):
             position: np.ndarray,
             transparency: float = 1.0,                                 # transparency, 1.0 = opaque
             ):
+        
+        self.publisher = self.node.create_publisher(Marker, self.topic_name, 10)
+        self.marker.ns = "single_point"
+        self.marker.id = 0
 
         self._set_MarkerStyle(
-            marker_namespace="single_point",
-            marker_id=0,
             marker_scaleX=radius,
             marker_scaleY=radius,
             marker_scaleZ=radius,
             marker_transparency=transparency,
             marker_color=color,
             )
-
+        
         pos = position.flatten()
         self.marker.pose.position.x = float(pos[0])
         self.marker.pose.position.y = float(pos[1])
@@ -103,123 +97,65 @@ class MarkerArrow(MarkerProperties):
         super().__init__(node, topic_name)
 
         self._create_Marker(marker_type=Marker.ARROW, marker_action=Marker.ADD)
-    
-    @staticmethod
-    def quaternion_from_euler(roll: np.ndarray, pitch: np.ndarray, yaw: np.ndarray) -> tuple:
-        
-        cy = np.cos(yaw * 0.5)
-        sy = np.sin(yaw * 0.5)
-        cp = np.cos(pitch * 0.5)
-        sp = np.sin(pitch * 0.5)
-        cr = np.cos(roll * 0.5)
-        sr = np.sin(roll * 0.5)
-
-        qx = sr * cp * cy - cr * sp * sy
-        qy = cr * sp * cy + sr * cp * sy
-        qz = cr * cp * sy - sr * sp * cy
-        qw = cr * cp * cy + sr * sp * sy
-
-        return (qx, qy, qz, qw)
 
     def publish_SingleArrow(
             self,
-            shaft_thick: float, 
-            head_size: float, 
+            shaft_diameter: float, 
+            head_diameter: float,
+            head_length: float, 
             color: np.ndarray,
             position: np.ndarray,
-            orientation: np.ndarray,
+            vector: np.ndarray,
             transparency: float = 1.0,                                 # transparency, 1.0 = opaque
             ):
+        
+        # self.publisher = self.node.create_publisher(Marker, self.topic_name, 10)
+        self.marker.ns = "single_arrow"
+        self.marker.id = 0
 
         self._set_MarkerStyle(
-            marker_namespace="single_arrow",
-            marker_id=0,
-            marker_scaleX=shaft_thick,
-            marker_scaleY=head_size,
-            marker_scaleZ=0.5,
+            marker_scaleX=shaft_diameter,
+            marker_scaleY=head_diameter,
+            marker_scaleZ=head_length,
             marker_transparency=transparency,
             marker_color=color,
             )
 
         pos = position.flatten()
-        ori = orientation.flatten()
-        
-        self.marker.pose.position.x = float(pos[0])
-        self.marker.pose.position.y = float(pos[1])
-        self.marker.pose.position.z = float(pos[2])
+        vec = vector.flatten()
+        norm = np.linalg.norm(vec)
 
-        qx, qy, qz, qw = self.quaternion_from_euler(ori[0], ori[1], ori[2])
-        self.marker.pose.orientation.x = float(qx)
-        self.marker.pose.orientation.y = float(qy)
-        self.marker.pose.orientation.z = float(qz)
-        self.marker.pose.orientation.w = float(qw)
+        if norm > 1e-9:
+            vec = vec / norm
+        else:
+            vec = vec
 
+        scale = 1000.0 * norm                               # scale factor for better visualization
+
+        start = Point()
+        start.x = float(pos[0])
+        start.y = float(pos[1])
+        start.z = float(pos[2])
+
+        end = Point()
+        end.x = float(pos[0] + scale * vec[0])
+        end.y = float(pos[1] + scale * vec[1])
+        end.z = float(pos[2] + scale * vec[2])
+
+        self.marker.points = [start, end]
         self.publisher.publish(self.marker)
 
-#     def create_ArrowMarker(
-#             self,
-#             namespace: str,
-#             marker_id: int,                            
-#             shaft_thick: float,                                             # arrow shaft thickness
-#             head_size: float,                                                      # arrowhead size
-#             color: np.ndarray,
-#             bound1: np.ndarray,
-#             bound2: np.ndarray,
-#             ) -> Marker:
-        
-#         marker = Marker()
-#         marker.header = self._make_Header()
-#         marker.ns = namespace
-#         marker.id = marker_id
-#         marker.type = Marker.ARROW
-#         marker.action = Marker.ADD
-#         marker.scale.x = shaft_thick         
-#         marker.scale.y = head_size                  
-#         marker.color.a = 1.0                          
-#         marker.color.r = color[0]
-#         marker.color.g = color[1]
-#         marker.color.b = color[2]
-
-#         initial = Marker().pose.position
-#         initial.x, initial.y, initial.z = (float(bound1[0]), float(bound1[1]), float(bound1[2]))
-
-#         terminal = Marker().pose.position
-#         terminal.x = float(bound1[0] + bound2[0])
-#         terminal.y = float(bound1[1] + bound2[1])
-#         terminal.z = float(bound1[2] + bound2[2])
-        
-#         marker.points.append(initial)                # initial point
-#         marker.points.append(terminal)              # terminal point
-
-#         return marker
-
-# class SingleArrow(MarkerArrow):
+    # def publish_ArrowArray(
+    #         self,
+    #         spacing: float,
+    #         number_grid: int,
+    #         shaft_diameter: float,
+    #         head_diameter: float,
+    #         head_length: float,
+    #         color: np.ndarray,
+    #         vector_function,
+    #         ):       
     
-#     def __init__(self, node: Node, topic_name: str):
-#         super().__init__(node)
-
-#         self.publisher = node.create_publisher(Marker, topic_name, 10)
-        
-#     def publish_single_arrow(
-#             self,
-#             shaft_thick: float,
-#             head_size: float,
-#             color: np.ndarray,
-#             bound1: np.ndarray,
-#             bound2: np.ndarray,
-#             ):
-        
-#         marker = self.create_ArrowMarker(
-#             shaft_thick=shaft_thick,
-#             head_size=head_size,
-#             color=color,
-#             bound1=bound1,
-#             bound2=bound2,
-#             namespace="single_arrow",
-#             marker_id=0
-#             )
-        
-#         self.publisher.publish(marker)
         
 # class ArrowArray(MarkerArrow):
 
