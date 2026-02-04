@@ -6,7 +6,7 @@ import signal
 import numpy as np
 from structure import RobotDesign
 from solver import ActuationModel
-from markers import *
+from markers import MarkerColors, MarkerPoint, MarkerArrow
 
 ## Streaming field result and estimated orientation ###############################################
 def stream_State():
@@ -28,10 +28,10 @@ def stream_State():
     signal.signal(signal.SIGINT, signal_handler)
 
     # b_array = ArrowArray(node, 'b_array')
-    r1 = MarkerPoint(node, 'r1')
-    r3 = MarkerPoint(node, 'r3')
-    m1 = MarkerArrow(node, 'm1')
-    m3 = MarkerArrow(node, 'm3')
+    r1 = MarkerPoint(node, topic_name='r1', is_array=False, radius=0.5, color=MarkerColors().red)
+    r3 = MarkerPoint(node, topic_name='r3', is_array=False, radius=0.5, color=MarkerColors().blue)
+    # m1 = MarkerArrow(node, 'm1')
+    # m3 = MarkerArrow(node, 'm3')
 
     while rclpy.ok():
 
@@ -57,27 +57,23 @@ def stream_State():
         #                           color=MarkerColors().yellow,
         #                           vector_function=Act.compute_Field)
 
-        # r1.publish_SinglePoint(radius=0.5,
-        #                  color=MarkerColors().red, 
-        #                  position=Act.rw['1'])
+        r1.publish_Point(position=Act.rw['1'])
         
-        # r3.publish_SinglePoint(radius=0.5,
-        #                  color=MarkerColors().blue,
-        #                  position=Act.rw['3'])
+        r3.publish_Point(position=Act.rw['3'])
 
-        m1.publish_SingleArrow(shaft_diameter=0.2,
-                               head_diameter=0.5,
-                               head_length=0.5,
-                               color=MarkerColors().red,
-                               position=Act.rw['1'],
-                               vector=Act.mw['1'])
+        # m1.publish_SingleArrow(shaft_diameter=0.2,
+        #                        head_diameter=0.5,
+        #                        head_length=0.5,
+        #                        color=MarkerColors().red,
+        #                        position=Act.rw['1'],
+        #                        vector=Act.mw['1'])
 
-        m3.publish_SingleArrow(shaft_diameter=0.2,
-                               head_diameter=0.5,
-                               head_length=0.5,
-                               color=MarkerColors().blue,
-                               position=Act.rw['3'],
-                               vector=Act.mw['3'])
+        # m3.publish_SingleArrow(shaft_diameter=0.2,
+        #                        head_diameter=0.5,
+        #                        head_length=0.5,
+        #                        color=MarkerColors().blue,
+        #                        position=Act.rw['3'],
+        #                        vector=Act.mw['3'])
 
         theta += np.pi/180
 

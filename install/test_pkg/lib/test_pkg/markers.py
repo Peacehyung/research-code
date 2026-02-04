@@ -22,16 +22,29 @@ class MarkerColors:
 ## Point marker ###################################################################################
 class MarkerProperties:
     
-    def __init__(self, node: Node, topic_name: str):
+    def __init__(self, node: Node, topic_name: str, is_array: bool):
+        
         self.node = node
         self.topic_name = topic_name
+        self.is_array = is_array
+
+        if self.is_array == True:
+            self.publisher = self.node.create_publisher(MarkerArray, self.topic_name, 10)
+            self.marker = MarkerArray()
+
+        elif self.is_array == False:
+            self.publisher = self.node.create_publisher(Marker, self.topic_name, 10)
+            self.marker = Marker()
+
+        else:
+            raise ValueError("is_array must be True or False")
+        
         self.publisher = self.node.create_publisher(Marker, self.topic_name, 10)
-    
+        
     def _make_Header(self) -> Header:
         return Header(frame_id="map", stamp=self.node.get_clock().now().to_msg())
 
     def _create_Marker(self, marker_type: int, marker_action: int):
-        self.marker = Marker()
         self.marker.header = self._make_Header()
         self.marker.type = marker_type
         self.marker.action = marker_action
@@ -56,45 +69,83 @@ class MarkerProperties:
 ## Point marker ###################################################################################
 class MarkerPoint(MarkerProperties):
 
-    def __init__(self, node: Node, topic_name: str):
-        
-        super().__init__(node, topic_name)
-
-        self._create_Marker(marker_type=Marker.SPHERE, marker_action=Marker.ADD)
-
-    def publish_SinglePoint(
+    def __init__(
             self,
-            radius: float, 
-            color: np.ndarray, 
-            position: np.ndarray,
+            node: Node, 
+            topic_name: str, 
+            is_array: bool,
+            radius: float,
+            color: np.ndarray,
             transparency: float = 1.0,                                 # transparency, 1.0 = opaque
             ):
         
-        # self.publisher = self.node.create_publisher(Marker, self.topic_name, 10)
-        self.marker.ns = "single_point"
-        self.marker.id = 0
+        super().__init__(node, topic_name, is_array)
 
+        self.radius = radius
+        self.color = color
+        self.transparency = transparency
+
+        if self.is_array == True:
+            pass                                            # To be implemented for array of points
+
+        elif self.is_array == False:
+            self.marker.ns = "single_point"
+            self.marker.id = 0
+
+        else:
+            raise ValueError("is_array must be True or False")
+
+        self._create_Marker(marker_type=Marker.SPHERE, marker_action=Marker.ADD)
+        
         self._set_MarkerStyle(
-            marker_scaleX=radius,
-            marker_scaleY=radius,
-            marker_scaleZ=radius,
-            marker_transparency=transparency,
-            marker_color=color,
+            marker_scaleX=self.radius,
+            marker_scaleY=self.radius,
+            marker_scaleZ=self.radius,
+            marker_transparency=self.transparency,
+            marker_color=self.color,
             )
         
+    def _create_Point(self, position: np.ndarray) -> Marker:
+
         pos = position.flatten()
+
         self.marker.pose.position.x = float(pos[0])
         self.marker.pose.position.y = float(pos[1])
         self.marker.pose.position.z = float(pos[2])
 
+        return self.marker
+    
+    def publish_Point(self, position: np.ndarray):
+
+        if self.is_array == True:
+            pass                                            # To be implemented for array of points
+
+        elif self.is_array == False:
+            self._create_Point(position)
+
+        else:
+            raise ValueError("is_array must be True or False")
+        
         self.publisher.publish(self.marker)
 
 ## Arrow marker family ############################################################################
 class MarkerArrow(MarkerProperties):
 
-    def __init__(self, node: Node, topic_name: str):
+    def __init__(self,node: Node, topic_name: str, is_array: bool = False):
         
         super().__init__(node, topic_name)
+
+        if is_array == True:
+            self.publisher = self.node.create_publisher(MarkerArray, self.topic_name, 10)
+            self.marker.ns = "arrow_array"
+
+        elif is_array == False:
+            self.publisher = self.node.create_publisher(Marker, self.topic_name, 10)
+            self.marker.ns = "single_arrow"
+            self.marker.id = 0
+
+        else:
+            raise ValueError("is_array must be True or False")
 
         self._create_Marker(marker_type=Marker.ARROW, marker_action=Marker.ADD)
 
